@@ -7,3 +7,4 @@ tmp/
 .jshintrc
 .npmignore
 .settings/
+*.class
