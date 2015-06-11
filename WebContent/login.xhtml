@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:ui="http://java.sun.com/jsf/facelets" 
+      xmlns:h="http://java.sun.com/jsf/html" 
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+      
+<h:head>
+	<title>MERCON - Login</title>
+
+	<link href="resources/stylesheets/style.css" rel="stylesheet" type="text/css" />
+	<link href="resources/stylesheets/bootstrap.css" rel="stylesheet" type="text/css" />
+	<link href="resources/stylesheets/main.css" rel="stylesheet" type="text/css" />
+	
+	<script type="text/javascript">
+		$('.ui-growl-image-error').parent().parent().addClass('ui-growl-item-container-error');
+	</script>
+</h:head>
+
+<h:body>
+	<h:form styleClass="login-wrapper">
+		<p:growl id="grwNotification" showDetail="false" sticky="true"></p:growl>
+	
+		<div class="header">
+	    	<div class="row">
+	        	<div class="col-md-12">
+	            	<h3>Login<img alt="MERCON" class="pull-right" src="resources/images/mercon.png" /></h3>
+	             	<p>Fill out the form below to login.</p>
+	           	</div>
+	    	</div>
+		</div>
+		<div class="content">
+        	<div class="row">
+            	<div class="col-md-12 col-sm-12">
+            		<p:inputText id="txtLogin" required="true" requiredMessage="Username is required" styleClass="input col-md-12 col-sm-12 email" value="#{user.username}" />
+            		<p:watermark for="txtLogin" value="username" />
+              	</div>
+            </div>
+            <div class="row">
+            	<div class="col-md-12 col-sm-12">
+                	<p:password id="txtPassword" required="true" requiredMessage="Password is required" styleClass="input col-md-12 col-sm-12 password" value="#{user.password}" />
+                	<p:watermark for="txtPassword" value="**********" />
+              	</div>
+            </div>
+		</div>
+		<div class="actions">
+			<p:commandButton actionListener="#{user.login}" ajax="false" styleClass="btn btn-success" value="Login" update="grwNotification" />
+		</div>
+	</h:form>
+	<p:ajaxStatus onerror="PF('dlgStatus').hide()" onstart="PF('dlgStatus').show()" onsuccess="PF('dlgStatus').hide()"></p:ajaxStatus>
+	<p:dialog closable="false" draggable="false" modal="true" resizable="false" showHeader="false" styleClass="dlg-status" widgetVar="dlgStatus">
+		<p:graphicImage name="/images/ajax-loader.gif"></p:graphicImage>
+	</p:dialog>
+</h:body>
+      
+</html>

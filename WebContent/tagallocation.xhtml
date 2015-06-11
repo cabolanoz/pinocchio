@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	style="background: #ffffff; overflow: hidden;">
+	
+	<h:head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+	
+		<title>Tags Allocation</title>
+	
+		<link href="resources/stylesheets/style.css" rel="stylesheet" type="text/css" />
+		<link href="resources/stylesheets/bootstrap.css" rel="stylesheet" type="text/css" />
+		<link href="resources/stylesheets/main.css" rel="stylesheet" type="text/css" />
+	</h:head>
+	
+	<h:body>
+		<h:form id="frmTagAllocation" onkeypress="if(event.keyCode == 13) { return false; }">
+			<div class="row">
+				<div class="col-md-12" style="padding: 10px;">
+					<div class="widget">
+						<div class="widget-header">
+							<div class="title" style="font-size: 18px;"><span class="fs1" aria-hidden="true" data-icon="&#xe022;"></span>  Available Lots</div>
+						</div>
+						<div class="widget-body">
+							<p:dataTable
+								emptyMessage="No builds found."
+								id="tblBuild"
+								selection="#{tagAllocation.selectBuild}"
+								selectionMode="single"
+								styleClass="data-table"
+								value="#{tagAllocation.lstBuild}"
+								var="lstBuild">
+								
+								<p:ajax event="rowSelect" global="false" listener="#{tagAllocation.onBuildSelect}" update=":frmTagAllocation:tblTag, :frmTagAllocation:txtAllocatedQty"></p:ajax>
+								
+								<p:column headerText="No. Build"  width="100%;">
+									<h:outputText value="#{lstBuild.id.buildDrawNum}" />
+								</p:column>
+							
+								<p:column headerText="No. Trade"  width="100%">
+									<h:outputText value="#{lstBuild.id.tradeNum}" />
+								</p:column>
+							
+								<p:column headerText="Trnf. Start Dt"  width="100%">
+									<h:outputText value="#{lstBuild.id.transferStartDt}" >
+										<f:convertDateTime pattern="MM/dd/yyyy" />
+									</h:outputText>
+								</p:column>
+							        
+								<p:column headerText="Trnf. End Dt"  width="100%">
+									<h:outputText value="#{lstBuild.id.transferEndDt}" >
+										<f:convertDateTime pattern="MM/dd/yyyy" />
+									</h:outputText>
+								</p:column>
+									
+								<p:column headerText="Quantity"  width="100%">
+									<h:outputText value="#{lstBuild.id.buildDrawQty}" >
+							        	 <f:convertNumber pattern="#,###,##0.000000" />
+							        </h:outputText>
+								</p:column>
+								
+								<p:column headerText="Allocation"  width="100%">
+									<h:outputText value="#{lstBuild.id.buildDrawQty - lstBuild.id.openQty}" >
+							        	 <f:convertNumber pattern="#,###,##0.000000" />
+							        </h:outputText>
+								</p:column>
+							        
+								<p:column headerText="No. Transfer"  width="100%">
+									<h:outputText value="#{lstBuild.id.transferNum}" />
+								</p:column>
+								
+							</p:dataTable>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12" style="padding: 10px;">
+					<div class="widget">
+						<div class="widget-header">
+							<div class="title" style="font-size: 18px;"><span class="fs1" aria-hidden="true" data-icon="&#xe02d;"></span>  Unallocated Draws</div>
+						</div>
+						<div class="widget-body">
+							<p:dataTable
+								emptyMessage="No draws found."
+								id="tblDraw"
+								selection="#{tagAllocation.selectDraw}"
+								selectionMode="single"
+								styleClass="data-table"
+								value="#{tagAllocation.lstDraw}"
+								var="lstDraw">
+								
+								<p:ajax event="rowSelect" global="false" process="@this"></p:ajax>
+								
+								<p:column headerText="No. Draw"  width="100%;">
+									<h:outputText value="#{lstDraw.id.buildDrawNum}" />
+								</p:column>
+							
+								<p:column headerText="Discharge Start Dt"  width="100%">
+									<h:outputText value="#{lstDraw.id.transferStartDt}" >
+										<f:convertDateTime pattern="MM/dd/yyyy" />
+									</h:outputText>
+								</p:column>
+							
+								<p:column headerText="Discharge End Dt"  width="100%">
+									<h:outputText value="#{lstDraw.id.transferEndDt}" >
+										<f:convertDateTime pattern="MM/dd/yyyy" />
+									</h:outputText>
+								</p:column>
+							        
+								<p:column headerText="Qty"  width="100%">
+									<h:outputText value="(#{-lstDraw.id.buildDrawQty})" style="#{lstDraw.id.buildDrawQty lt 0 ? 'color: #ed321d' : 'color: #666666'}; float: right;">
+							        	 <f:convertNumber pattern="#,###,##0.0000" />
+							        </h:outputText>
+								</p:column>
+									
+								<p:column headerText="Open Qty"  width="100%">
+									<h:outputText value="(#{-lstDraw.id.openQty})" style="#{lstDraw.id.openQty lt 0 ? 'color: #ed321d' : 'color: #666666'}; float: right;">
+							        	 <f:convertNumber pattern="#,###,##0.0000" />
+							        </h:outputText>
+								</p:column>
+								
+								<p:column headerText="Trade No."  width="100%">
+									<h:outputText value="#{lstDraw.id.tradeNum}" />
+								</p:column>
+							        
+								<p:column headerText="Obligation No."  width="100%">
+									<h:outputText value="#{lstDraw.id.obligationNum}" />
+								</p:column>
+								
+								<p:column headerText="Transfer No."  width="100%">
+									<h:outputText value="#{lstDraw.id.transferNum}" />
+								</p:column>
+								
+							</p:dataTable>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12" style="padding: 10px;">
+					<div class="widget">
+						<div class="widget-header">
+							<div class="title" style="font-size: 18px;"><span class="fs1" aria-hidden="true" data-icon="&#xe031;"></span>  Tags</div>
+						</div>
+						<div class="widget-body">
+							<p:dataTable
+								emptyMessage="No tags found for selected build."
+								id="tblTag"
+								scrollable="true"
+								scrollHeight="200"
+								styleClass="data-table"
+								value="#{tagAllocation.lstTag}"
+								var="lstTag">
+								
+								<p:column headerText="Type"  width="100%;">
+									<h:outputText value="#{lstTag.id.tagTypeCd}" />
+								</p:column>
+							
+								<p:column headerText="Chop Id"  width="100%">
+									<h:outputText value="#{lstTag.id.chopId}" />
+								</p:column>
+							
+								<p:column headerText="Container"  width="100%">
+									<h:outputText value="#{lstTag.id.tagValue1}" />
+								</p:column>
+							        
+								<p:column headerText="ICO"  width="100%">
+									<h:outputText value="#{lstTag.id.tagValue2}" />
+								</p:column>
+									
+								<p:column headerText="Tag Qty"  width="100%">
+									<h:outputText value="#{lstTag.id.tagQty}" >
+							        	 <f:convertNumber pattern="#,###,##0.000000" />
+							        </h:outputText>
+								</p:column>
+								
+								<p:column headerText="Qty UOM"  width="100%">
+									<h:outputText value="#{lstTag.id.tagQtyUomCd}" />
+								</p:column>
+
+								<p:column headerText="Allocated Qty"  width="100%">
+									<h:outputText value="#{lstTag.id.tagAllocQty}" >
+							        	 <f:convertNumber pattern="#,###,##0.000000" />
+							        </h:outputText>
+								</p:column>
+
+								<p:column headerText="Open Qty"  width="100%">
+									<h:outputText value="#{lstTag.id.tagQty - lstTag.id.tagAllocQty}" >
+							        	 <f:convertNumber pattern="#,###,##0.000000" />
+							        </h:outputText>
+								</p:column>
+								
+								<p:column headerText="Qty To Allocate"  width="100%">
+									<h:inputText value="#{lstTag.id.qtyToAllocate}" style="text-align: right; width: 95%;" rendered="#{lstTag.id.tagQty - lstTag.id.tagAllocQty > 0}" >
+						            	<p:ajax listener="#{tagAllocation.onChangeAllocateQty(lstTag)}" global="false" update=":frmTagAllocation:tblTag, :frmTagAllocation:txtAllocatedQty"></p:ajax>
+										<f:convertNumber pattern="#,###,##0.000000" />
+							        </h:inputText>
+								</p:column>
+								
+							</p:dataTable>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="clearfix"></div>
+			<div class="actions" style="margin-top: 16px;">
+				<ul class="stats hidden-xs pull-left">
+					<li>
+		              	<div class="details">
+		                	<span class="big" style="color: #E46D0A; font-weight: bold;">
+		                		<h:outputText id="txtAllocatedQty" value="#{tagAllocation.allocatedQty}">
+		                			<f:convertNumber groupingUsed="true" minFractionDigits="6" pattern="#,###,##0.000000" type="number" />
+		                		</h:outputText>
+		                	</span>
+		                	<div class="clearfix"></div>
+		                	<span class="small" style="color: #666666;">Qty To Allocate</span>
+		              	</div>
+		            </li>
+	            </ul>
+				<p:commandButton actionListener="#{tagAllocation.onCloseTagAllocation}" styleClass="btn btn-default pull-right" value="Cancel"></p:commandButton>
+				<p:commandButton actionListener="#{tagAllocation.onSaveTagAllocation}" process="@this" styleClass="btn btn-primary pull-right" value="Save"></p:commandButton>
+			</div>
+		</h:form>
+	</h:body>
+	
+</html>

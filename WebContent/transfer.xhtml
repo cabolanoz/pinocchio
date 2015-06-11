@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:ui="http://java.sun.com/jsf/facelets" 
+      xmlns:h="http://java.sun.com/jsf/html" 
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+      
+      <h:head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+	
+		<title>MERCON - Transfer</title>
+	
+		<link href="resources/stylesheets/style.css" rel="stylesheet" type="text/css" />
+		<link href="resources/stylesheets/bootstrap.css" rel="stylesheet" type="text/css" />
+		<link href="resources/stylesheets/main.css" rel="stylesheet" type="text/css" />
+	</h:head>
+	<h:body>
+		<div class="main-container">
+			<h:form id="frmTransfer">
+				<p:growl id="grwNotification" showDetail="false" sticky="true"></p:growl>
+				
+				<header>
+					<div class="logo">
+				        <img alt="MERCON" src="resources/images/mercon.png" style="width: 30%;" />
+				    </div>
+					<div id="mini-nav">
+						<ul>
+							<li>
+					            <a href="javascript:void();">
+					            	<span class="icon-user"></span>
+					            	<span class="text-label"><p:outputLabel style="font-weight: lighter; font-size: inherit;" value="#{transfer.user.userPermission.id.firstname} #{transfer.user.userPermission.id.lastName}" /></span>
+					            </a>
+					            <ul class="user-summary">
+									<li>
+										<div class="summary">
+											<div class="user-pic">
+												<img src="resources/images/user.png" alt="Slick Admin"/>
+											</div>
+											<div class="basic-details">
+					                    		<h4 class="no-margin"><p:outputLabel value="#{transfer.user.userPermission.id.username}" /></h4>
+					                    		<h5 class="no-margin"><p:outputLabel value="#{transfer.user.userPermission.id.name}" /></h5>
+					                    		<small><p:outputLabel value="#{transfer.user.userPermission.id.location}" /></small>
+					                    	</div>
+					                  		<div class="clearfix"></div>
+					                  	</div>
+									</li>
+									<li>
+										<p:commandButton actionListener="#{user.logout}" delay="1000" immediate="true" process="@this" styleClass="btn btn-xs btn-danger pull-right" value="Logout"></p:commandButton>
+					                	<span class="clearfix"></span>
+					              	</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+				</header>
+				<div class="main-container">
+					<div class="dashboard-wrapper">
+						<div class="row page-title">
+							<h2>Transfer Manager 
+								<small>
+									<li><a href="dashboard.xhtml">Home</a></li>
+									<li>/</li>
+									<li>Transfer</li>
+								</small>
+							</h2>
+				        </div>
+				        <div class="col-md-12">
+				        	<div class="widget no-margin">
+				        		<div class="widget-body no-border">
+				        			<div class="row">
+				        				<div class="col-md-6">
+				        					<div class="form-horizontal">
+				        						<div class="form-group">
+				        							<label class="col-sm-3 control-label" style="margin-right: 10px;">From</label>
+				        							<div class="col-sm-3">
+				        								<p:selectOneMenu converter="fromTypeConverter" style="width: 100%;" styleClass="control-select" value="#{transfer.fromTypeObj}">
+				        									<p:ajax event="change" global="false" listener="#{transfer.onFromTypeSelect}" update=":frmTransfer:tabTransfer:pnlFromType"></p:ajax>
+															<f:selectItems itemLabel="#{vFromType.indValueName}" itemValue="#{vFromType}" value="#{fromType.lstFromTypes}" var="vFromType"></f:selectItems>
+														</p:selectOneMenu>
+				        							</div>
+				        						</div>
+				        						<div class="form-group">
+				        							<label class="col-sm-3 control-label" style="margin-right: 10px;">To</label>
+				        							<div class="col-sm-3">
+				        								<p:selectOneMenu converter="fromTypeConverter" style="width: 100%;" styleClass="control-select" value="#{transfer.toTypeObj}">
+				        									<p:ajax event="change" global="false" listener="#{transfer.onToTypeSelect}" update=":frmTransfer:tabTransfer:pnlToType"></p:ajax>
+															<f:selectItems itemDisabled="#{vToType.indValue eq 0 or vToType.indValue eq 7 ? 'true' : 'false'}" itemLabel="#{vToType.indValueName}" itemValue="#{vToType}" value="#{fromType.lstFromTypes}" var="vToType"></f:selectItems>
+														</p:selectOneMenu>
+				        							</div>
+				        						</div>
+				        						<div class="form-group">
+				        							<label class="col-sm-3 control-label" style="margin-right: 10px;">Commencement Dt.</label>
+				        							<div class="col-sm-3">
+				        								<p:calendar placeholder="MM/dd/yyyy" pattern="MM/dd/yyyy" showOn="button" style="display: inline-flex; width: 400px;" value="#{transfer.commencementDt}" />
+				        							</div>
+				        						</div>
+				        						<div class="form-group">
+				        							<label class="col-sm-3 control-label" style="margin-right: 10px;">Location</label>
+				        							<div class="col-sm-3">
+				        								<p:selectOneMenu converter="locationConverter" style="width: 100%;" styleClass="control-select" value="#{transfer.location}">
+															<f:selectItems itemLabel="#{vLocation.nameLocation}" itemValue="#{vLocation}" value="#{location.lstLocations}" var="vLocation"></f:selectItems>
+														</p:selectOneMenu>
+				        							</div>
+				        						</div>
+				        					</div>
+				        				</div>
+				        			</div>
+				        			<div class="clearfix"></div>
+				        			<div class="row">
+				        				<div class="col-md-12">
+				        					<p:tabView id="tabTransfer" styleClass="nav nav-tabs">
+				        						<p:tab title="Transfer">
+				        							<div class="col-md-6" style="padding-right: 10px;">
+							        					<div class="form-horizontal">
+							        						<h3 class="heading-a">Transfer From</h3>
+							        						<p:panel id="pnlFromType" styleClass="panel-default">
+							        							<p:panel styleClass="panel-default" visible="#{transfer.fromTrade}">
+								        							<div class="form-group">
+								        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Trade Number</label>
+								        								<div class="col-sm-3">
+								        									<p:autoComplete
+														        				completeMethod="#{transfer.onTradeComplete}"
+														        				converter="tradeConverter"
+														        				forceSelection="true"
+														        				itemLabel="#{tradeHdr.id.tradeNum}" 
+														        				itemValue="#{tradeHdr}"
+														        				minQueryLength="4"
+														        				value="#{transfer.tradeHdr}"
+														        				var="tradeHdr">
+															       				 <p:column headerText="Buy/Sell" styleClass="column-normal" style="background: transparent; border: 1px solid #f7f7f7; color: #006633;"><h:outputText style="color: #4f4f4f !important;" value="#{tradeHdr.id.buySellInd eq 1 ? 'Buy' : 'Sell'}" /></p:column>
+															       				 <p:column headerText="Commodity" styleClass="column-normal" style="background: transparent; border: 1px solid #f7f7f7; color: #006633;"><h:outputText style="color: #4f4f4f !important;" value="#{tradeHdr.id.cmdtyCd}" /></p:column>
+															       				 <p:column headerText="Trade Qty" styleClass="column-normal" style="background: transparent; border: 1px solid #f7f7f7; color: #006633;">
+															       				 	<h:outputText style="color: #4f4f4f !important;" value="#{tradeHdr.id.tradeQty}">
+														             					<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00"/>
+														             				</h:outputText>
+															       				 </p:column>
+															       				 <p:column headerText="Open Qty" styleClass="column-normal" style="background: transparent; border: 1px solid #f7f7f7; color: #006633;">
+															       				 	<h:outputText style="color: #4f4f4f !important;" value="#{tradeHdr.id.openQty}">
+															       				 		<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00" />
+															       				 	</h:outputText>
+															       				 </p:column>
+															       				 <p:ajax event="itemSelect" global="false" listener="#{transfer.onTradeSelect}" update="txtScheduledQty, txtNominalQty, txtToStorageQty"></p:ajax>
+														        			</p:autoComplete>
+								        								</div>
+								        							</div>
+								        							<div class="form-group">
+								        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Scheduled Qty</label>
+								        								<div class="col-sm-3">
+								        									<p:inputText id="txtScheduledQty" styleClass="form-control" value="#{transfer.scheduledQty}">
+								        										<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00"/>
+								        									</p:inputText>
+								        								</div>
+								        							</div>
+								        							<div class="form-group">
+								        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Nominal Qty</label>
+								        								<div class="col-sm-3">
+								        									<p:inputText disabled="true" id="txtNominalQty" styleClass="form-control" value="#{transfer.nominalQty}">
+								        										<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00"/>
+								        									</p:inputText>
+								        								</div>
+								        							</div>
+								        						</p:panel>
+								        						<p:panel styleClass="panel-default" visible="#{transfer.fromStorage}">
+								        							<div class="form-group">
+								        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Storage</label>
+								        								<div class="col-sm-3">
+								        									<p:inputText styleClass="form-control" value=""></p:inputText>
+								        								</div>
+								        							</div>
+								        							<div class="form-group">
+								        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Level</label>
+								        								<div class="col-sm-3">
+								        									<p:inputText styleClass="form-control" value=""></p:inputText>
+								        								</div>
+								        							</div>
+								        							<div class="form-group">
+								        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Storage Qty</label>
+								        								<div class="col-sm-3">
+								        									<p:inputText styleClass="form-control" value=""></p:inputText>
+								        								</div>
+								        							</div>
+								        						</p:panel>
+								        						<p:panel styleClass="panel-default" visible="#{transfer.fromVessel or transfer.fromBarge or transfer.fromTruck or transfer.fromPipeline or transfer.fromRailcar}">
+								        							<div class="form-group">
+								        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Vehicle</label>
+								        								<div class="col-sm-3">
+								        									<p:inputText styleClass="form-control" value=""></p:inputText>
+								        								</div>
+								        							</div>
+								        							<div class="form-group">
+								        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Cargo</label>
+								        								<div class="col-sm-3">
+								        									<p:inputText styleClass="form-control" value=""></p:inputText>
+								        								</div>
+								        							</div>
+								        							<div class="form-group">
+								        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Cargo Qty</label>
+								        								<div class="col-sm-3">
+								        									<p:inputText styleClass="form-control" value=""></p:inputText>
+								        								</div>
+								        							</div>
+								        							<div class="form-group">
+								        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Transfer At</label>
+								        								<div class="col-sm-3">
+								        									<p:inputText styleClass="form-control" value=""></p:inputText>
+								        								</div>
+								        							</div>
+								        						</p:panel>
+								        						<p:panel styleClass="panel-default" visible="#{transfer.fromStorageSvc}">
+								        							<div class="form-group">
+								        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Counterpart</label>
+								        								<div class="col-sm-3">
+								        									<p:inputText styleClass="form-control" value=""></p:inputText>
+								        								</div>
+								        							</div>
+								        						</p:panel>
+							        						</p:panel>
+							        					</div>
+							        				</div>
+							        				<div class="col-md-6" style="padding-left: 10px;">
+							        					<div class="form-horizontal">
+							        						<h3 class="heading-a">Transfer To</h3>
+							        						<p:panel id="pnlToType" styleClass="panel-default">
+							        							<p:panel styleClass="panel-default" visible="#{transfer.toStorage}">
+								        							<div class="form-group">
+								        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Storage</label>
+								        								<div class="col-sm-3">
+								        									<p:selectOneMenu converter="storageConverter" filter="true" filterMatchMode="contains" style="width: 100%;" styleClass="control-select" value="#{transfer.toStorageId}">
+								        										<p:ajax event="change" global="false" listener="#{transfer.onToStorageSelect}" update="txtToLevel"></p:ajax>
+																				<f:selectItems itemLabel="#{vStorage.codStorage}" itemValue="#{vStorage}" value="#{storage.lstStorages}" var="vStorage"></f:selectItems>
+																			</p:selectOneMenu>
+								        								</div>
+								        							</div>
+								        							<div class="form-group">
+								        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Level</label>
+								        								<div class="col-sm-3">
+								        									<p:selectOneMenu converter="cargoConverter" filter="true" filterMatchMode="contains" id="txtToLevel" style="width: 100%;" styleClass="control-select" value="#{transfer.toLevel}">
+																				<f:selectItems itemLabel="#{vLevel.id.nameCargo}" itemValue="#{vLevel}" value="#{transfer.toLevelLst}" var="vLevel"></f:selectItems>
+																			</p:selectOneMenu>
+								        								</div>
+								        							</div>
+								        							<div class="form-group">
+								        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Storage Qty</label>
+								        								<div class="col-sm-3">
+								        									<p:inputText disabled="true" id="txtToStorageQty" styleClass="form-control" value="#{transfer.toStorageQty}">
+								        										<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00"/>
+								        									</p:inputText>
+								        								</div>
+								        							</div>
+								        							<div class="form-group">
+								        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Transfer At</label>
+								        								<div class="col-sm-3">
+								        									<p:selectOneMenu converter="transferAtConverter" style="width: 100%;" styleClass="control-select" value="#{transfer.toTransferAtId}">
+																				<f:selectItems itemLabel="#{vTransferAt.indValueName}" itemValue="#{vTransferAt}" value="#{transferAt.transferAts}" var="vTransferAt"></f:selectItems>
+																			</p:selectOneMenu>
+								        								</div>
+								        							</div>
+								        						</p:panel>
+								        						<p:panel styleClass="panel-default" visible="#{transfer.toVessel}">
+								        							<div class="form-group">
+								        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Vehicle</label>
+								        								<div class="col-sm-3">
+								        									<p:inputText styleClass="form-control" value=""></p:inputText>
+								        								</div>
+								        							</div>
+								        							<div class="form-group">
+								        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Cargo</label>
+								        								<div class="col-sm-3">
+								        									<p:inputText styleClass="form-control" value=""></p:inputText>
+								        								</div>
+								        							</div>
+								        							<div class="form-group">
+								        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Cargo Qty</label>
+								        								<div class="col-sm-3">
+								        									<p:inputText styleClass="form-control" value=""></p:inputText>
+								        								</div>
+								        							</div>
+								        							<div class="form-group">
+								        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Transfer At</label>
+								        								<div class="col-sm-3">
+								        									<p:inputText styleClass="form-control" value=""></p:inputText>
+								        								</div>
+								        							</div>
+								        						</p:panel>
+							        						</p:panel>
+							        					</div>
+							        				</div>
+				        						</p:tab>
+				        						<p:tab title="Tags">
+				        							<p:commandLink actionListener="#{transfer.onAddTag}" global="false" process="@this" style="margin-bottom: 10px;" styleClass="btn btn-primary" update="tblTag">
+							                    		<h:outputText value="Add Tag" />
+							                    	</p:commandLink>
+							                    	<p:fileUpload fileUploadListener="#{transfer.onUploadTag}" label="Add Tags From Excel" mode="advanced" style="margin-left: 10px; margin-bottom: 10px;"  styleClass="btn btn-primary" update="tblTag"></p:fileUpload>
+							                    	<p:commandLink actionListener="#{transfer.onRemoveAllTag}" global="false" process="@this" style="margin-left: 10px; margin-bottom: 10px;" styleClass="btn btn-danger" update="tblTag">
+							                    		<h:outputText value="Remove All Tags" />
+							                    	</p:commandLink>
+				        						
+				        							<p:dataTable
+				        								editable="true"
+							        					editMode="cell"
+							                    		emptyMessage="No Tags found."
+							                    		id="tblTag"
+							                    		selection="#{transfer.tag}"
+							                    		styleClass="data-table"
+							                    		value="#{transfer.tagLst}"
+							                    		var="tagLst">
+							                    		
+							                    		<p:column headerText="Type">
+						                    				<p:cellEditor>
+							                    				<f:facet name="output"><h:outputText value="#{tagLst.id.tagTypeCd}" /></f:facet>
+							                    				<f:facet name="input"><h:inputText disabled="true" value="#{tagLst.id.tagTypeCd}" /></f:facet>
+							                    			</p:cellEditor>
+													    </p:column>
+													    
+													    <p:column headerText="Chop Id">
+						                    				<p:cellEditor>
+							                    				<f:facet name="output"><h:outputText value="#{tagLst.id.chopId}" /></f:facet>
+							                    				<f:facet name="input"><h:inputText disabled="true" value="#{tagLst.id.chopId}" /></f:facet>
+							                    			</p:cellEditor>
+													    </p:column>
+													    
+													    <p:column headerText="Container">
+						                    				<p:cellEditor>
+							                    				<f:facet name="output"><h:outputText value="#{tagLst.id.tagValue1}" /></f:facet>
+							                    				<f:facet name="input"><h:inputText value="#{tagLst.id.tagValue1}" /></f:facet>
+							                    			</p:cellEditor>
+													    </p:column>
+							                    		
+							                    		<p:column headerText="ICO">
+						                    				<p:cellEditor>
+							                    				<f:facet name="output"><h:outputText value="#{tagLst.id.tagValue2}" /></f:facet>
+							                    				<f:facet name="input"><h:inputText value="#{tagLst.id.tagValue2}" /></f:facet>
+							                    			</p:cellEditor>
+													    </p:column>
+													    
+													    <p:column headerText="Comments">
+						                    				<p:cellEditor>
+							                    				<f:facet name="output"><h:outputText value="#{tagLst.id.tagValue8}" /></f:facet>
+							                    				<f:facet name="input"><h:inputText value="#{tagLst.id.tagValue8}" /></f:facet>
+							                    			</p:cellEditor>
+													    </p:column>
+													    
+													    <p:column headerText="Tag Qty">
+					                    					<p:cellEditor>
+							                    				<f:facet name="output">
+							                    					<h:outputText value="#{tagLst.id.tagQty}">
+							                    						<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00" />
+							                    					</h:outputText>
+							                    				</f:facet>
+							                    				<f:facet name="input"><h:inputText value="#{tagLst.id.tagQty}" /></f:facet>
+							                    			</p:cellEditor>
+													    </p:column>
+													    
+													    <p:column headerText="Tag Qty UOM">
+						                    				<p:cellEditor>
+							                    				<f:facet name="output"><h:outputText value="#{tagLst.id.tagQtyUomCd}" /></f:facet>
+							                    				<f:facet name="input"><h:inputText disabled="true" value="#{tagLst.id.tagQtyUomCd}" /></f:facet>
+							                    			</p:cellEditor>
+													    </p:column>
+													    
+													    <p:column style="width: 40px;">
+											        	 	<p:cellEditor>
+							                                	<f:facet name="output">
+							                                    	<p:commandLink disabled="#{transferLst.numTransfer gt 0 ? true : false}" id="lnkRemoveTag" process="@this" styleClass="row-trash icon-remove" style="margin-left: 3px !important; margin-top: -10px !important;" update="tblTag"></p:commandLink>
+							                                    	<pe:tooltip adjustX="-5" for="lnkRemoveTag" myPosition="top, center" value="Remove transfer" />
+							                                   </f:facet>
+							                                   <f:facet name="input"><h:outputText styleClass="row-trash icon-remove" style="color: #666666 !important; margin-left: 8px !important; margin-top: -10px !important; z-index: 1016;" value="" /></f:facet>
+							                               </p:cellEditor>
+												       	</p:column>
+						                    		</p:dataTable>
+				        						</p:tab>
+				        					</p:tabView>
+				        				</div>
+				        			</div>
+				        		</div>
+				        	</div>
+				        </div>
+				        <div class="clearfix"></div>
+		        		<div class="actions">
+							<p:commandButton actionListener="#{transfer.onTransferSave}" process="@this, :frmTransfer:tabTransfer:pnlFromType, :frmTransfer:tabTransfer:pnlToType" styleClass="btn btn-default" value="Preview Transfer"></p:commandButton>
+		        			<p:commandButton styleClass="btn btn-success" value="Save"></p:commandButton>
+						</div>
+					</div>
+				</div>
+			</h:form>
+			<footer style="clear: both; height: 20px; padding: 20px 0 0 0; position: relative; width: 100%;">
+			  	<p style="float: right; margin: 0 5% 0 0;"><small>Copyright <h:outputText value="#{user.currentDt}"><f:convertDateTime pattern="yyyy" /></h:outputText>, Mercon Coffee Corporation</small></p>
+			</footer>
+		</div>
+	</h:body>
+</html>

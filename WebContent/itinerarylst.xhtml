@@ -1,0 +1,547 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:ui="http://java.sun.com/jsf/facelets" 
+      xmlns:h="http://java.sun.com/jsf/html" 
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+      
+	<h:head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+	
+		<title>MERCON - Shipping Manager</title>
+	
+		<link href="resources/stylesheets/style.css" rel="stylesheet" type="text/css" />
+		<link href="resources/stylesheets/bootstrap.css" rel="stylesheet" type="text/css" />
+		<link href="resources/stylesheets/main.css" rel="stylesheet" type="text/css" />
+		
+		<script type="text/javascript">
+			function changeOverlayPosition(widget) {
+				var jq = widget.jq;
+
+				var top = jq.css('top');
+
+				var topNumber = top.substring(0, top.length - 2);
+
+				var isFixedPosition = jq.css('position') == 'fixed';
+				var window = $(window);
+				var positionOffset = isFixedPosition ? '-' + window.scrollLeft() + ' -' + window.scrollTop() : null;
+				
+				jq.css({ 'left' : '0px', 'top' : (parseFloat(topNumber) + 12) + 'px' })
+					.position({ offset : positionOffset });
+
+				// Expanding row
+				var tblMatchObligation = $("div[id*='tblMatchObligation']");
+				
+				var rowToggler = $(tblMatchObligation).find('.ui-row-toggler');
+				
+				$(rowToggler).click();
+			}
+
+			function showDlgNote(widget) {
+				var widgetPosition = $(widget).position();
+				var widgetTop = widgetPosition.top;
+				var widgetLeft = widgetPosition.left;
+				
+				PF('dlgNote').initPosition();
+				PF('dlgNote').getJQ().offset({ 'left' : (widgetLeft + 'px'), 'top' : (widgetTop + 'px') });
+				PF('dlgNote').show();
+			}
+
+			function hideDlgNote() {
+				PF('dlgNote').hide();
+			}
+		</script>
+	</h:head>
+	<h:body>
+		<div class="main-container">
+			<h:form id="frmItineraryLst" onkeypress="if(event.keyCode == 13) { return false; }">
+				<p:growl id="grwNotification" showDetail="false" sticky="true"></p:growl>
+				
+				<p:confirmDialog global="true" styleClass="confirm-dlg" widgetVar="confirmDlg">
+		       		<p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" />
+		       		<p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" />
+		       	</p:confirmDialog>
+				
+				<header>
+					<div class="logo">
+				        <img alt="MERCON" src="resources/images/mercon.png" style="width: 30%;" />
+				    </div>
+					<div id="mini-nav">
+						<ul>
+							<li>
+					            <a href="javascript:void();">
+					            	<span class="icon-user"></span>
+					            	<span class="text-label"><p:outputLabel style="font-weight: lighter; font-size: inherit;" value="#{itineraryLst.user.userPermission.id.firstname} #{itineraryLst.user.userPermission.id.lastName}" /></span>
+					            </a>
+					            <ul class="user-summary">
+									<li>
+										<div class="summary">
+											<div class="user-pic">
+												<img src="resources/images/user.png" alt="Slick Admin"/>
+											</div>
+											<div class="basic-details">
+					                    		<h4 class="no-margin"><p:outputLabel value="#{itineraryLst.user.userPermission.id.username}" /></h4>
+					                    		<h5 class="no-margin"><p:outputLabel value="#{itineraryLst.user.userPermission.id.name}" /></h5>
+					                    		<small><p:outputLabel value="#{itineraryLst.user.userPermission.id.location}" /></small>
+					                    	</div>
+					                  		<div class="clearfix"></div>
+					                  	</div>
+									</li>
+									<li>
+										<p:commandButton actionListener="#{user.logout}" delay="1000" immediate="true" process="@this" styleClass="btn btn-xs btn-danger pull-right" value="Logout"></p:commandButton>
+					                	<span class="clearfix"></span>
+					              	</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+				</header>
+				<div class="main-container">
+				<div class="dashboard-wrapper">
+					<div class="row page-title">
+						<h2>Shipping Manager 
+							<small>
+								<li><a href="dashboard.xhtml">Home</a></li>
+								<li>/</li>
+								<li>Shipping Manager</li>
+							</small>
+						</h2>
+			        </div>
+				
+					<div class="col-md-12">
+						<p:dataTable
+							editable="false"
+							emptyMessage="No Itineraries found."
+							id="tblItinerary"
+							lazy="true"
+							paginator="true"
+							paginatorPosition="bottom"
+							paginatorTemplate="{FirstPageLink} {PageLinks} {LastPageLink} {CurrentPageReport}"
+							rows="15"
+							rowsPerPageTemplate="10, 50, 100"
+							styleClass="data-table"
+							value="#{itineraryLst.opsItinerariesId}"
+							var="opsItinerariesId"
+							widgetVar="tblItinerary">
+							
+							<p:ajax event="rowToggle" listener="#{itineraryLst.onRowExpandForMovement}" />
+							
+							<f:facet name="header">
+								<p:outputPanel style="text-align: right;">
+									<p:link outcome="itinerary" style="float: left; text-shadow: none;" styleClass="btn btn-primary" value="New Itinerary">
+										<f:param name="id" value="-1" />
+									</p:link>
+									<h:outputText style="color: #006633; font-weight: lighter;" value="Search by trade " />
+									<p:inputText id="globalFilter" onkeyup="if (event.keyCode == 13) { PF('tblItinerary').filter(); }" placeholder="Trade Number + Enter" style="width: 200px;" />
+								</p:outputPanel>
+							</f:facet>
+						
+							<p:column style="width:40px">
+					            <p:rowToggler />
+					        </p:column>
+					        
+							<p:column headerText="Itinerary Number">
+								<h:outputText value="#{opsItinerariesId.itineraryNum}" />
+		     				</p:column>
+							
+							<p:column headerText="Itinerary Name">
+								<h:outputText value="#{opsItinerariesId.itineraryName}" />
+		     				</p:column>
+							
+		     				<p:column headerText="Operator">
+								<h:outputText value="#{opsItinerariesId.operatorPerson.firstname} #{opsItinerariesId.operatorPerson.lastname}" />
+		     				</p:column>
+							
+							<p:column headerText="Start Date" style="text-align: center;">
+								<h:outputText value="#{opsItinerariesId.startDt}">
+             						<f:convertDateTime pattern="MM/dd/yyyy" />
+             					</h:outputText>
+		     				</p:column>
+		     				
+		     				<p:column headerText="End Date" style="text-align: center;">
+								<h:outputText value="#{opsItinerariesId.endDt}">
+             						<f:convertDateTime pattern="MM/dd/yyyy" />
+             					</h:outputText>
+		     				</p:column>
+		     				
+							<p:column headerText="Created Date" style="text-align: center;">
+								<h:outputText value="#{opsItinerariesId.createDt}">
+             						<f:convertDateTime pattern="MM/dd/yyyy" />
+             					</h:outputText>
+		     				</p:column>
+		     				
+							<p:column style="width: 40px;">
+								<p:link id="lnkEditItinerary" outcome="itinerary" style="margin-left: 3px;" styleClass="icon-pencil-lighten" value="">
+									<f:param name="id" value="#{opsItinerariesId.itineraryNum}" />
+								</p:link>
+								<pe:tooltip adjustX="-5" for="lnkEditItinerary" myPosition="top, center" value="Edit itinerary" />
+					       	</p:column>
+					       	
+					       	<p:rowExpansion>
+					       		<div class="panel-detail" style="margin: 10px 0;">
+			        				<p:dataTable
+			                    		emptyMessage="No Movements found."
+			                    		id="tblMovement"
+			                    		styleClass="data-table"
+			                    		value="#{opsItinerariesId.movements}"
+			                    		var="movements">
+			                    		
+			                    		<p:ajax event="rowToggle" listener="#{itineraryLst.onRowExpandForCargo}" />
+			                    		
+			                    		<f:facet name="header">
+											<p:outputPanel style="text-align: left;">
+												<h:outputText style="color: #006633; font-weight: lighter;" value="Movements" />
+											</p:outputPanel>
+										</f:facet>
+			                    		
+			                    		<p:column style="width:40px">
+								            <p:rowToggler />
+								        </p:column>
+			                    		
+			                    		<p:column headerText="Movement Number" style="text-align: left !important;">
+											<h:outputText value="#{movements.id.movementNum}" />
+					     				</p:column>
+										
+										<!-- <p:column headerText="Equipment Number" style="text-align: left !important;">
+											<h:outputText value="#{movements.id.equipmentNum}" />
+					     				</p:column> -->
+										
+										<p:column headerText="MOT" style="text-align: left !important;">
+											<h:outputText value="#{movements.id.motId.indValueName}" />
+					     				</p:column>
+					     				
+					     				<p:column headerText="Vehicle">
+											<h:outputText value="#{movements.id.motNumId.motCd}" />
+					     				</p:column>
+					     				
+					     				<p:column headerText="Status" style="text-align: left !important;">
+											<h:outputText value="#{movements.id.movementStatus.indValueName}" />
+					     				</p:column>
+										
+										<p:column headerText="Depart From" style="text-align: left !important;">
+											<h:outputText value="#{movements.id.departLocation.nameLocation}" />
+					     				</p:column>
+										
+										<p:column headerText="Depart On" style="text-align: center;">
+											<h:outputText value="#{movements.id.departDt}">
+			             						<f:convertDateTime pattern="MM/dd/yyyy" />
+			             					</h:outputText>
+					     				</p:column>
+										
+										<p:column headerText="Arrive At" style="text-align: left !important;">
+											<h:outputText value="#{movements.id.arriveLocation.nameLocation}" />
+					     				</p:column>
+										
+										<p:column headerText="Arrive On" style="text-align: center;">
+											<h:outputText value="#{movements.id.arriveDt}">
+			             						<f:convertDateTime pattern="MM/dd/yyyy" />
+			             					</h:outputText>
+					     				</p:column>
+					     				
+					     				<p:column headerText="SI Date" style="text-align: center;">
+											<h:outputText value="#{movements.id.actionCompletionDt}">
+			             						<f:convertDateTime pattern="MM/dd/yyyy" />
+			             					</h:outputText>
+					     				</p:column>
+					     				
+					     				<p:column style="width: 80px;">
+					     					<p:commandLink actionListener="#{itineraryLst.seeNote(movements)}" id="lnkSeeNote" process="@this" style="margin-left: 5px;" styleClass="icon-file" update="txtNote"></p:commandLink>
+					     					<p:overlayPanel dynamic="true" for="lnkSeeNote" hideEffect="fade" id="olyNote" onShow="changeOverlayPosition(this);" styleClass="panel-overlay note-triangle" style="width: 100%;">
+					     						<p:inputTextarea cols="33" disabled="true" id="txtNote" rows="10" style="background: #fff !important; border: none; border-radius: 0px; box-shadow: none; opacity: 1; width: 100% !important; -moz-border-radius: 0px; -moz-box-shadow: none; -webkit-border-radius: 0px; -webkit-box-shadow: none;" value="#{itineraryLst.note}" />
+					     					</p:overlayPanel>
+					     					<pe:tooltip adjustX="-5" for="lnkSeeNote" myPosition="top, center" value="See note" />
+											<p:commandLink actionListener="#{itineraryLst.seeMatchObligation(movements.id.movementNum)}" disabled="#{movements.id.obligationMatch gt 0 ? false : true}" id="lnkSeeMO" process="@this" style="margin-left: 20px;" styleClass="#{movements.id.obligationMatch gt 0 ? 'icon-stack-lighten' : 'icon-stack'}"></p:commandLink>
+											<p:overlayPanel dynamic="true" for="lnkSeeMO" hideEffect="fade" id="olyMatchObligation" onShow="changeOverlayPosition(this);" styleClass="panel-overlay mo-triangle" style="width: 100%;">
+												<p:dataTable id="tblMatchObligation" emptyMessage="No Match Obligation found." styleClass="data-table" value="#{itineraryLst.opsObligationMatch}" var="opsObligationMatch">
+										            <f:facet name="header">
+														<p:outputPanel style="border-left: 3px solid #00acec; padding: 8px 0; text-align: left;">
+															<h:outputText style="font-size: 16px; font-weight: lighter; padding-left: 10px;" value="Match Obligation - #{movements.id.movementNum}" />
+															<small style="color: #333333; font-size: 10px; font-weight: lighter; opacity: 0.6;">(Match Description)</small>
+														</p:outputPanel>
+													</f:facet>
+										            
+										            <p:column style="width:40px">
+											            <p:rowToggler />
+											        </p:column>
+										            
+										            <p:column headerText="Match Number">
+										                <h:outputText value="#{opsObligationMatch.id.obligationMatchNum}" />
+										            </p:column>
+										 
+										            <p:column headerText="Match Desc.">
+										                <h:outputText value="#{opsObligationMatch.id.matchDesc}" />
+										            </p:column>
+										 
+										            <p:column headerText="Commodity">
+										                <h:outputText value="#{opsObligationMatch.id.cmdtyCd}" />
+										            </p:column>
+										 
+										            <p:column headerText="Operator">
+										                <h:outputText value="#{opsObligationMatch.id.operatorPerson.firstname} #{opsObligationMatch.id.operatorPerson.lastname}" />
+										            </p:column>
+										            
+										            <p:column headerText="Application Date">
+										                <h:outputText value="#{opsObligationMatch.id.applicationDt}">
+										                	<f:convertDateTime pattern="MM/dd/yyyy" />
+										                </h:outputText>
+										            </p:column>
+										            
+										            <p:column headerText="Effective Date">
+										                <h:outputText value="#{opsObligationMatch.id.matchDt}">
+										                	<f:convertDateTime pattern="MM/dd/yyyy" />
+										                </h:outputText>
+										            </p:column>
+										            
+										            <p:column headerText="Internal Company">
+										                <h:outputText value="#{opsObligationMatch.id.internalCompany.nameCompany}" />
+										            </p:column>
+										            
+										            <p:column headerText="Status">
+										                <h:outputText value="#{opsObligationMatch.id.deliveryActiveStatusInd eq 1 ? 'Active' : 'Void'}" />
+										            </p:column>
+										            
+										            <p:column headerText="MOT">
+										                <h:outputText value="#{opsObligationMatch.id.motType.indValueName}" />
+										            </p:column>
+										            
+										            <p:column style="width: 40px;">
+										            	<p:commandLink actionListener="#{itineraryLst.voidMatchObligation(opsObligationMatch.id.obligationMatchNum)}" id="lnkVoidMO" process="@this" style="color: #D24149; margin-left: 3px;" styleClass="icon-link" update=":frmItineraryLst:tblItinerary, :frmItineraryLst:grwNotification">
+										            		<p:confirm message="Are you sure about voiding this match obligation?"></p:confirm>
+										            	</p:commandLink>
+										            	<pe:tooltip adjustX="-5" for="lnkVoidMO" myPosition="top, center" value="Void match obligation" />
+										            </p:column>
+										            
+										            <p:rowExpansion>
+											       		<div class="panel-detail" style="margin: 10px 0;">
+									        				<p:dataTable styleClass="data-table" value="#{opsObligationMatch.id.opsObligationDetail}" var="opsObligationDetail">
+									        					<p:column headerText="Strategy">
+													                <h:outputText style="color: #{opsObligationDetail.id.buySellInd eq '-1' ? '#D24149' : '#006633'}" value="#{opsObligationDetail.id.strategy.nameStrategy}" />
+													            </p:column>
+													            
+													            <p:column headerText="Trade">
+													                <h:outputText style="color: #{opsObligationDetail.id.buySellInd eq '-1' ? '#D24149' : '#006633'}" value="#{opsObligationDetail.id.tradeNum}" />
+													            </p:column>
+													            
+													            <p:column headerText="Section">
+													                <h:outputText style="color: #{opsObligationDetail.id.buySellInd eq '-1' ? '#D24149' : '#006633'}" value="#{opsObligationDetail.id.termSectionCd}" />
+													            </p:column>
+													            
+													            <p:column headerText="Buy/Sell">
+													                <h:outputText style="color: #{opsObligationDetail.id.buySellInd eq '-1' ? '#D24149' : '#006633'}" value="#{opsObligationDetail.id.buySellInd eq '-1' ? 'Sell' : 'Buy'}" />
+													            </p:column>
+													            
+													            <p:column headerText="Commodity">
+													                <h:outputText style="color: #{opsObligationDetail.id.buySellInd eq '-1' ? '#D24149' : '#006633'}" value="#{opsObligationDetail.id.cmdtyCd}" />
+													            </p:column>
+													            
+													            <p:column headerText="Counterpart">
+													                <h:outputText style="color: #{opsObligationDetail.id.buySellInd eq '-1' ? '#D24149' : '#006633'}" value="#{opsObligationDetail.id.counterpartName}" />
+													            </p:column>
+													            
+													            <p:column headerText="Contract Qty">
+													                <h:outputText style="color: #{opsObligationDetail.id.buySellInd eq '-1' ? '#D24149' : '#006633'}" value="#{opsObligationDetail.id.contractQty}">
+													                	<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00"/>
+													                </h:outputText>
+													            </p:column>
+													            
+													            <p:column headerText="UOM">
+													                <h:outputText style="color: #{opsObligationDetail.id.buySellInd eq '-1' ? '#D24149' : '#006633'}" value="#{opsObligationDetail.id.contractUomCd}" />
+													            </p:column>
+													            
+													            <p:column headerText="Scheduled Qty">
+													                <h:outputText style="color: #{opsObligationDetail.id.buySellInd eq '-1' ? '#D24149' : '#006633'}" value="#{opsObligationDetail.id.scheduledQty}">
+													                	<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00"/>
+													                </h:outputText>
+													            </p:column>
+									        				</p:dataTable>
+									        			</div>
+									        		</p:rowExpansion>
+									        	</p:dataTable>
+											</p:overlayPanel>
+		                                 	<pe:tooltip adjustX="-5" rendered="#{movements.id.obligationMatch gt 0 ? true : false}" for="lnkSeeMO" myPosition="top, center" value="See match obligation" />
+								       	</p:column>
+					     				
+					     				<p:rowExpansion>
+					       					<div class="panel-detail" style="margin: 10px 0;">
+					       						<p:dataTable
+						                    		emptyMessage="No Cargos found."
+						                    		styleClass="data-table"
+						                    		value="#{movements.id.cargos}"
+						                    		var="cargos">
+						                    		
+						                    		<f:facet name="header">
+														<p:outputPanel style="text-align: left;">
+															<h:outputText style="color: #006633; font-weight: lighter;" value="Cargo" />
+														</p:outputPanel>
+													</f:facet>
+						                    		
+						                    		<p:column headerText="Cargo Number">
+						                    			<h:outputText value="#{cargos.id.numCargo}" />
+						                    		</p:column>
+						                    		
+						                    		<p:column headerText="Cargo Name">
+												    	<h:outputText value="#{cargos.id.nameCargo}" />
+													</p:column>
+											
+													<p:column headerText="Strategy">
+												    	<h:outputText value="#{cargos.id.numStrategy.nameStrategy}" />
+													</p:column>
+											
+													<p:column headerText="Commodity">
+												    	<h:outputText value="#{cargos.id.commodityCod.codCommodity}" />
+													</p:column>
+											
+													<p:column headerText="Quantity UOM">
+												    	<h:outputText value="#{cargos.id.qtyUomCod.codUom}" />
+													</p:column>
+											
+													<p:column headerText="Price Currency">
+												    	<h:outputText value="#{cargos.id.currPriceCod.codcurr}" />
+													</p:column>
+											
+													<p:column headerText="Price UOM">
+												    	<h:outputText value="#{cargos.id.prcUomCod.codUom}" />
+													</p:column>
+											
+													<p:column headerText="MTM Curve">
+														<h:outputText value="#{cargos.id.mtmCurveNum.coddefquote}" />
+													</p:column>
+											
+													<p:column headerText="Cargo Quantity">
+												    	<h:outputText style="float: right; margin-right: 10px;" value="#{cargos.id.capacity}">
+										        			<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00"/>
+										        		</h:outputText>
+													</p:column>
+						                    	</p:dataTable>
+						                    	<div class="clearfix"></div>
+						                    	<p:dataTable
+						                    		emptyMessage="No Transfers found."
+						                    		style="margin-top: 10px;"
+						                    		styleClass="data-table"
+						                    		value="#{movements.id.transfers}"
+						                    		var="transfers">
+						                    		
+						                    		<f:facet name="header">
+														<p:outputPanel style="text-align: left;">
+															<h:outputText style="color: #006633; font-weight: lighter;" value="Transfers" />
+														</p:outputPanel>
+													</f:facet>
+						                    		
+						                    		<p:column style="width: 40px">
+											            <p:rowToggler rendered="#{transfers.id.tagLst.size() gt 0 ? true : false}" />
+											        </p:column>
+						                    		
+						                    		<p:column headerText="Transfer Number">
+						                    			<h:outputText value="#{transfers.id.numTransfer}" />
+						                    		</p:column>
+						                    		
+						                    		<p:column headerText="Load/Discharge">
+												    	<h:outputText value="#{transfers.id.loadDischargeObj.indValueName}" />
+													</p:column>
+											
+													<p:column headerText="From">
+												    	<h:outputText value="#{transfers.id.fromTypeObj.indValueName}" />
+													</p:column>
+											
+													<p:column headerText="To">
+												    	<h:outputText value="#{transfers.id.toTypeObj.indValueName}" />
+													</p:column>
+											
+													<p:column headerText="POD/POL">
+												    	<h:outputText value="#{transfers.id.locationObj.nameLocation}" />
+													</p:column>
+											
+													<p:column headerText="Location">
+												    	<h:outputText value="#{transfers.id.loadDischargeObj.indValueName eq 'Discharge To' ? transfers.id.locationIdentifier : '--'}" />
+												    </p:column>
+											
+													<p:column headerText="Effective Date">
+														<h:outputText value="#{transfers.id.dtEffective}">
+															<f:convertDateTime pattern="MM/dd/yyyy"/>
+														</h:outputText>
+													</p:column>
+											
+													<p:column headerText="Commencement Date">
+												    	<h:outputText value="#{transfers.id.dtTransferComm}">
+												    		<f:convertDateTime pattern="MM/dd/yyyy" />
+												    	</h:outputText>
+													</p:column>
+													
+													<p:column headerText="BL Number">
+														<h:outputText value="#{transfers.id.loadDischargeObj.indValueName eq 'Load From' ? transfers.id.codBlNum : '--'}" />
+													</p:column>
+													
+													<p:column headerText="BL Date">
+														<h:outputText value="#{transfers.id.loadDischargeObj.indValueName eq 'Load From' ? transfers.id.dtBl : '--'}">
+															<f:convertDateTime patter="MM/dd/yyyy" />
+														</h:outputText>
+													</p:column>
+													
+													<p:rowExpansion rendered="#{transfers.id.tagLst.size() gt 0 ? true : false}">
+											       		<div class="panel-detail" style="margin: 10px 0;">
+									        				<p:dataTable
+									                    		emptyMessage="No Tags found."
+									                    		styleClass="data-table"
+									                    		value="#{transfers.id.tagLst}"
+									                    		var="tags">
+									                    		
+									                    		<f:facet name="header">
+																	<p:outputPanel style="text-align: left;">
+																		<h:outputText style="color: #006633; font-weight: lighter;" value="Tags" />
+																	</p:outputPanel>
+																</f:facet>
+									                    		
+									                    		<p:column headerText="Type">
+								                    				<h:outputText value="#{tags.tagTypeCd}" />
+															    </p:column>
+															    
+															    <p:column headerText="Chop Id">
+								                    				<h:outputText value="#{tags.chopId}" />
+															    </p:column>
+															    
+															    <p:column headerText="Container">
+								                    				<h:outputText value="#{tags.tagValue1}" />
+															    </p:column>
+									                    		
+									                    		<p:column headerText="ICO">
+								                    				<h:outputText value="#{tags.tagValue2}" />
+															    </p:column>
+															    
+															    <p:column headerText="Tag Qty">
+							                    					<h:outputText value="#{tags.tagQty}">
+							                    						<f:convertNumber type="number" groupingUsed="true" minFractionDigits="12" pattern="#0.000000000000" />
+							                    					</h:outputText>
+															    </p:column>
+															    
+															    <p:column headerText="Tag Qty UOM">
+								                    				<h:outputText disabled="true" value="#{tags.tagQtyUomCd}" />
+															    </p:column>
+								                    		</p:dataTable>
+														</div>
+						                    		</p:rowExpansion>
+						                    	</p:dataTable>
+					       					</div>
+					       				</p:rowExpansion>
+		                    		</p:dataTable>
+			        			</div>
+					       	</p:rowExpansion>
+						</p:dataTable>
+					</div>
+				</div>
+				</div>
+			</h:form>
+			<footer style="clear: both; height: 20px; padding: 20px 0 0 0; position: relative; width: 100%;">
+			  	<p style="float: right; margin: 0 5% 0 0;"><small>Copyright <h:outputText value="#{user.currentDt}"><f:convertDateTime pattern="yyyy" /></h:outputText>, Mercon Coffee Corporation</small></p>
+			</footer>
+			<p:ajaxStatus onerror="PF('dlgStatus').hide()" onstart="PF('dlgStatus').show()" onsuccess="PF('dlgStatus').hide()"></p:ajaxStatus>
+			<p:dialog closable="false" draggable="false" modal="true" resizable="false" showHeader="false" styleClass="dlg-status" widgetVar="dlgStatus">
+				<p:graphicImage name="/images/ajax-loader.gif"></p:graphicImage>
+			</p:dialog>
+		</div>
+	</h:body>
+	
+</html>

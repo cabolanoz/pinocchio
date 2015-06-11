@@ -1,0 +1,9 @@
+*.keep
+log/
+tmp/
+.idea/
+.editorconfig
+.jshintignore
+.jshintrc
+.npmignore
+.settings/

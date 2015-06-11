@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faces-config
+    xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd"
+    version="2.2">
+	
+	<application>
+        <action-listener>org.primefaces.application.DialogActionListener</action-listener>
+        <navigation-handler>org.primefaces.application.DialogNavigationHandler</navigation-handler>
+        <view-handler>org.primefaces.application.DialogViewHandler</view-handler>
+    </application>
+
+	<lifecycle>
+		<phase-listener>com.mercon.phaselistener.SessionPhaseListener</phase-listener>
+	</lifecycle>
+
+	<!-- Managed beans -->
+	<!-- User -->
+	<managed-bean>
+    	<managed-bean-name>user</managed-bean-name>
+        <managed-bean-class>com.mercon.beans.UserBean</managed-bean-class>
+        <managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+
+	<!-- Navigation rules -->
+	<navigation-rule>
+		<from-view-id>*</from-view-id>
+		<navigation-case>
+			<from-outcome>login</from-outcome>
+			<to-view-id>/login.xhtml</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+	
+	<navigation-rule>
+		<from-view-id>*</from-view-id>
+		<navigation-case>
+			<from-outcome>dashboard</from-outcome>
+			<to-view-id>/dashboard.xhtml</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+	
+	<navigation-rule>
+		<from-view-id>*</from-view-id>
+		<navigation-case>
+			<from-outcome>itinerarylst</from-outcome>
+			<to-view-id>/itinerarylst.xhtml</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+	
+	<navigation-rule>
+		<from-view-id>*</from-view-id>
+		<navigation-case>
+			<from-outcome>itinerary</from-outcome>
+			<to-view-id>/itinerary.xhtml</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+	
+	<navigation-rule>
+		<from-view-id>*</from-view-id>
+		<navigation-case>
+			<from-outcome>itineraryfake</from-outcome>
+			<to-view-id>/tagallocation.xhtml</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+	
+	<navigation-rule>
+		<from-view-id>*</from-view-id>
+		<navigation-case>
+			<from-outcome>transferlst</from-outcome>
+			<to-view-id>/transferlst.xhtml</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+	
+	<navigation-rule>
+		<from-view-id>*</from-view-id>
+		<navigation-case>
+			<from-outcome>transfer</from-outcome>
+			<to-view-id>/transfer.xhtml</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+	
+	<navigation-rule>
+		<from-view-id>*</from-view-id>
+		<navigation-case>
+			<from-outcome>notfound</from-outcome>
+			<to-view-id>/notfound.xhtml</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+
+</faces-config>

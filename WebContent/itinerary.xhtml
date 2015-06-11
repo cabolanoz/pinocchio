@@ -1,0 +1,1579 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:ui="http://java.sun.com/jsf/facelets" 
+      xmlns:h="http://java.sun.com/jsf/html" 
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+      
+	<h:head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+	
+		<title>MERCON - Itinerary</title>
+	
+		<link href="resources/stylesheets/style.css" rel="stylesheet" type="text/css" />
+		<link href="resources/stylesheets/bootstrap.css" rel="stylesheet" type="text/css" />
+		<link href="resources/stylesheets/main.css" rel="stylesheet" type="text/css" />
+		
+		<script type="text/javascript">
+			var isPanelExpanded = false;
+			var isPopupVisible = false;
+
+			function showMatchObligation(widget) {
+				var popup = $('.pnl-float-info');
+
+				var tradeContractType = document.getElementById("frmItinerary:txtTradeContractType");
+
+				if ('Sell' != tradeContractType.value) {
+					if (!isPopupVisible) {
+						popup.slideDown();
+						isPopupVisible = true;
+					} else {
+						popup.slideUp('slow');
+						isPopupVisible = false;
+					}
+				}
+			}
+
+			function hideMatchObligation() {
+				var popup = $('.pnl-float-info');
+				
+				if (isPopupVisible) {
+					popup.slideUp('slow');
+					isPopupVisible = false;
+				}
+			}
+
+			function showDlgNote(widget) {
+				var widgetPosition = $(widget).position();
+				var widgetTop = widgetPosition.top;
+				var widgetLeft = widgetPosition.left;
+				
+				PF('dlgNote').initPosition();
+				PF('dlgNote').getJQ().offset({ 'left' : (widgetLeft - 416), 'top' : (widgetTop + 386) });
+				PF('dlgNote').show();
+			}
+
+			function hideDlgNote() {
+				PF('dlgNote').hide();
+			}
+
+			function hideDlgTransfer() {
+				PF('dlgTransfer').hide();
+			}
+
+			function showDlgMatchObligation(widget) {
+				var widgetPosition = $(widget).position();
+				var widgetTop = widgetPosition.top;
+				var widgetLeft = widgetPosition.left;
+				
+				PF('dlgMatchObligation').initPosition();
+				PF('dlgMatchObligation').getJQ().offset({ 'left' : (widgetLeft - 422), 'top' : (widgetTop + 622) });
+				PF('dlgMatchObligation').show();
+			}
+
+			function hideDlgMatchObligation() {
+				PF('dlgMatchObligation').hide();
+			}
+
+			function onRowsExpandForMovement() {
+				var lnkExpandCollapse = $("a[id*='lnkExpandCollapse']");
+				
+				if (isPanelExpanded) {
+					//$(lnkExpandCollapse).text("Expand All");
+
+					isPanelExpanded = false;
+				} else {
+					var tblMovement = $("div[id*='tblMovement']");
+
+					var rowToggler = $(tblMovement).find('.ui-row-toggler');
+
+					$(rowToggler).click();
+					
+					//$(lnkExpandCollapse).text("Collapse All");
+
+					isPanelExpanded = true;
+				}
+			}
+
+			function onRowsExpandForTag() {
+				var tblTag = $("div[id*='tblTag']");
+
+				var rowToggler = $(tblTag).find('.ui-row-toggler');
+
+				$(rowToggler).click();
+			}
+			
+			function onRowExpandForMatchObligation() {
+				var tblMatchObligation = $("div[id*='tblMatchObligation']");
+				
+				var rowToggler = $(tblMatchObligation).find('.ui-row-toggler');
+				
+				$(rowToggler).click();
+			}
+		</script>
+	</h:head>
+	
+	<h:body>
+		<div class="main-container">
+			<h:form id="frmItinerary" onkeypress="if(event.keyCode == 13) { return false; }">
+				<f:metadata>
+					<f:viewParam name="id" value="#{itinerary.id}"></f:viewParam>
+					<f:event listener="#{itinerary.init}" type="preRenderView"></f:event>
+				</f:metadata>
+			
+				<h:inputHidden id="txtTradeContractType" value="#{itinerary.tradeContractType}" />
+			
+			<header>
+				<div class="logo">
+			        <img alt="MERCON" src="resources/images/mercon.png" style="width: 30%;" />
+			    </div>
+				<div id="mini-nav">
+					<ul>
+						<li>
+				            <a href="javascript:void();">
+				            	<span class="icon-user"></span>
+				            	<span class="text-label"><p:outputLabel style="font-weight: lighter; font-size: inherit;" value="#{itinerary.user.userPermission.id.firstname} #{itinerary.user.userPermission.id.lastName}" /></span>
+				            </a>
+				            <ul class="user-summary">
+								<li>
+									<div class="summary">
+										<div class="user-pic">
+											<img src="resources/images/user.png" alt="Slick Admin"/>
+										</div>
+										<div class="basic-details">
+				                    		<h4 class="no-margin"><p:outputLabel value="#{itinerary.user.userPermission.id.username}" /></h4>
+				                    		<h5 class="no-margin"><p:outputLabel value="#{itinerary.user.userPermission.id.name}" /></h5>
+				                    		<small><p:outputLabel value="#{itinerary.user.userPermission.id.location}" /></small>
+				                    	</div>
+				                  		<div class="clearfix"></div>
+				                  	</div>
+								</li>
+								<li>
+									<p:commandButton actionListener="#{user.logout}" delay="1000" immediate="true" process="@this" styleClass="btn btn-xs btn-danger pull-right" value="Logout"></p:commandButton>
+				                	<span class="clearfix"></span>
+				              	</li>
+							</ul>
+						</li>
+					</ul>
+				</div>
+			</header>
+			<div class="main-container">
+			<div class="dashboard-wrapper">
+				<div class="row page-title">
+					<h2>Shipping Manager 
+						<small>
+							<li><a href="dashboard.xhtml">Home</a></li>
+							<li>/</li>
+							<li><a href="itinerarylst.xhtml">Shipping Manager</a></li>
+							<li>/</li>
+							<li>Itinerary <h:outputText style="color: #D24149; font-size: 10px; font-weight: lighter;" value="#{itinerary.id eq '-1' ? '': itinerary.id}" /></li>
+						</small>
+		          	</h2>
+		          	<p:panel id="pnlBag" styleClass="panel-default" visible="#{itinerary.thereIsTradeNumber}">
+						<div class="bags-title">
+							<ul class="stats hidden-xs">
+								<li class="sea-green-bg" data-placement="right" data-toggle="tooltip" style="cursor: default;">
+									<span class="fs1"></span>
+			              			<div class="details">
+			              				<span class="small">Trade Qty</span>
+			                			<span class="big">
+			                				<h:outputText id="tradeQty" value="#{itinerary.tradeQty}">
+			                					<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#,###,##0.00" />
+			                				</h:outputText>
+			                			</span>
+			                			<span class="small">
+			                				Bags of <h:outputText id="contractUomCd" value="#{itinerary.contractUomCd}" />
+			                			</span>
+			              			</div>
+			            		</li>
+			            		<li class="ruby-red-bg" data-placement="right" data-toggle="tooltip" style="cursor: default;">
+			            			<span class="fs1"></span>
+			              			<div class="details">
+			              				<span class="small">Open Qty</span>
+			                			<span class="big">
+			                				<h:outputText id="missingTradeQty" value="#{itinerary.missingTradeQty}">
+			                					<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#,###,##0.00" />
+			                				</h:outputText>
+			                			</span>
+			                			<span class="small">
+			                				Bags of <h:outputText id="missingContractUomCd" value="#{itinerary.contractUomCd}" />
+			                			</span>
+			              			</div>
+			            		</li>
+			          		</ul>
+		        		</div>
+					</p:panel>
+		        </div>
+		        
+		        <div class="row">
+	        		<p:growl id="grwNotification" showDetail="false" sticky="true"></p:growl>
+	        	
+	        		<p:confirmDialog global="true" styleClass="confirm-dlg" widgetVar="confirmDlg">
+			       		<p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" />
+			       		<p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" />
+			       	</p:confirmDialog>
+	        	
+	        		<div class="col-md-4 col-sm-4">
+		        		<p:panelGrid columns="2" styleClass="control-panel">
+		        			<h:outputLabel for="txtTradeNumber" styleClass="control-label" value="Trade Number" />
+		        			<p:autoComplete
+		        				completeMethod="#{itinerary.onTradeComplete}"
+		        				converter="tradeConverter"
+		        				disabled="#{itinerary.id eq '-1' ? false : true}"
+		        				forceSelection="true"
+		        				id="txtTradeNumber"
+		        				itemLabel="#{inputTrade.id.tradeNum}" 
+		        				itemValue="#{inputTrade}"
+		        				minQueryLength="4"
+		        				required="true"
+		        				requiredMessage="Trade Number is required"
+		        				value="#{itinerary.tradeHdr}"
+		        				var="inputTrade">
+			       				 <p:column headerText="Buy/Sell" styleClass="column-normal" style="background: transparent; border: 1px solid #f7f7f7; color: #006633;"><h:outputText style="color: #4f4f4f !important;" value="#{inputTrade.id.buySellInd eq 1 ? 'Buy' : 'Sell'}" /></p:column>
+			       				 <p:column headerText="Commodity" styleClass="column-normal" style="background: transparent; border: 1px solid #f7f7f7; color: #006633;"><h:outputText style="color: #4f4f4f !important;" value="#{inputTrade.id.cmdtyCd}" /></p:column>
+			       				 <p:column headerText="Trade Qty" styleClass="column-normal" style="background: transparent; border: 1px solid #f7f7f7; color: #006633;">
+			       				 	<h:outputText style="color: #4f4f4f !important;" value="#{inputTrade.id.tradeQty}">
+		             					<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00"/>
+		             				</h:outputText>
+			       				 </p:column>
+			       				 <p:column headerText="Open Qty" styleClass="column-normal" style="background: transparent; border: 1px solid #f7f7f7; color: #006633;">
+			       				 	<h:outputText style="color: #4f4f4f !important;" value="#{inputTrade.id.openQty}">
+			       				 		<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00" />
+			       				 	</h:outputText>
+			       				 </p:column>
+			       				 <p:ajax event="itemSelect" listener="#{itinerary.onTradeSelect}" update=":frmItinerary:txtTradeContractType, txtItineraryName, txtCompanyCode, tradeQty, missingTradeQty, contractUomCd, missingContractUomCd, tblMovement, pnlBag, :frmItinerary:tblMatchObligation, :frmItinerary:tblMatchObligation:tblPurchase, :frmItinerary:tblMatchObligation:tblSell, :frmItinerary:tblMatchObligation:txtTradeContractNumber, :frmItinerary:grwNotification"></p:ajax>
+		        			</p:autoComplete>
+		        			
+		        			<h:outputLabel for="txtItineraryName" styleClass="control-label" value="Itinerary Name" />
+		        			<p:inputText id="txtItineraryName" required="true" requiredMessage="Itinerary Name is required" styleClass="form-control" value="#{itinerary.itineraryName}">
+		        				<p:ajax event="change" listener="#{itinerary.onChangeItineraryName}"></p:ajax>
+		        			</p:inputText>
+		        			
+		        			<h:outputLabel for="txtCompanyCode" styleClass="control-label" value="Int. Company" />
+		        			<p:selectOneMenu converter="companyConverter" disabled="true" id="txtCompanyCode" required="true" requiredMessage="Internal Company is required" styleClass="control-select" value="#{itinerary.companyId}">
+		        				<f:selectItems itemLabel="#{vCompany.nameCompany}" itemValue="#{vCompany}" value="#{company.lstCompanies}" var="vCompany" />
+		        			</p:selectOneMenu>
+		        			
+		        			<h:outputLabel for="txtOperatorCode" styleClass="control-label" value="Operator" />
+		        			<p:selectOneMenu converter="personConverter" disabled="#{itinerary.id eq '-1' ? false : true}" id="txtOperatorCode" required="true" requiredMessage="Operator is required" styleClass="control-select" value="#{itinerary.personId}">
+		        				<p:ajax event="change" listener="#{itinerary.onPersonSelected}"></p:ajax>
+		        				<f:selectItems itemLabel="#{vPerson.firstname} #{vPerson.lastname}" itemValue="#{vPerson}" value="#{person.lstPersons}" var="vPerson" />
+		        			</p:selectOneMenu>
+		        		</p:panelGrid>
+	        		</div>
+	        		<div class="clearfix"></div>
+					<div class="panel panel-success col-md-12">
+						<div class="panel-heading">
+	                    	<h3 class="panel-title">Movements <small style="float: right; font-size: 10px; padding-top: 3px;">(After adding a movement, click on the plus icon to add a cargo)</small></h3>
+						</div>
+	                    <div class="panel-body">
+<!-- 	                    	<p:commandLink id="lnkExpandCollapse" onclick="onRowsExpandForMovement()" style="margin-bottom: 14px; margin-right: 10px;" styleClass="btn btn-default" value="Expand All"></p:commandLink> -->
+	                    	<p:commandLink actionListener="#{itinerary.addMovement}" style="margin-bottom: 14px;" styleClass="btn btn-success" update=":frmItinerary:grwNotification, tblMovement">
+	                    		<h:outputText value="Add Movement" />
+	                    	</p:commandLink>
+	                    	<p:dataTable
+	                    		editable="true"
+	                    		emptyMessage="No movements found. Please click on 'Add Movement' button to add a new movement."
+	                    		id="tblMovement"
+	                    		rowIndexVar="rowIndex"
+	                    		selection="#{itinerary.movementId}"
+	                    		styleClass="data-table"
+	                    		value="#{itinerary.movementLst}"
+	                    		var="movementLst">
+	                    		
+	                    		<p:ajax async="true" event="rowToggle" listener="#{itinerary.onRowExpandForMovement}" update="tblTransfer" />
+	                    		
+	                    		<p:column style="width:40px">
+						            <p:rowToggler />
+						        </p:column>
+						        
+						        <p:column headerText="#" style="text-align: center; width: 60px">
+	                    			<h:outputText style="color: #666666; font-weight: bold;" value="#{rowIndex + 1}" />
+	                    		</p:column>
+						        
+						        <p:column headerText="Mov. Number">
+						        	<p:cellEditor>
+						        		<f:facet name="output"><h:outputText value="#{movementLst.movementNum}" /></f:facet>
+						        		<f:facet name="input"><h:inputText disabled="true" value="#{movementLst.movementNum}" /></f:facet>
+						        	</p:cellEditor>
+						        </p:column>
+						        
+								<p:column headerText="MOT">
+									<p:cellEditor>
+	               						<f:facet name="output">
+	               							<h:outputText value="#{movementLst.motTypeInd.indValueName}" />
+	               						</f:facet>
+	               						<f:facet name="input">
+	               							<h:selectOneMenu converter="tMotConverter" required="true" requiredMessage="MOT is required" value="#{movementLst.motTypeInd}" style="width:100%">
+	               								<f:selectItems itemLabel="#{tMot.indValueName}" itemValue="#{tMot}" value="#{mot.lstMots}" var="tMot"></f:selectItems>
+	               							</h:selectOneMenu>
+	               						</f:facet>
+	           						</p:cellEditor>
+	       						</p:column>
+								<p:column headerText="Vehicle">
+							    	<p:cellEditor>
+							        	<f:facet name="output"><h:outputText value="#{movementLst.motNumId.motCd}" /></f:facet>
+							            <f:facet name="input">
+							            	<h:selectOneMenu converter="refMotConverter" required="true" requiredMessage="Vehicle is quired" value="#{movementLst.motNumId}" style="width: 100%;">
+							            		<f:selectItems itemLabel="#{refMotId.motCd}" itemValue="#{refMotId}" value="#{refMot.lstRefMots}" var="refMotId"></f:selectItems>
+							            	</h:selectOneMenu>
+							            </f:facet>
+									</p:cellEditor>
+								</p:column>	
+	       						<p:column headerText="Status">
+							    	<p:cellEditor>
+							        	<f:facet name="output"><h:outputText value="#{movementLst.movementStatusInd.indValueName}" /></f:facet>
+							            <f:facet name="input">
+							            	<h:selectOneMenu converter="sMotConverter" required="true" requiredMessage="Status is required" value="#{movementLst.movementStatusInd}" style="width:100%">
+	               								<f:selectItems itemLabel="#{sMot.indValueName}" itemValue="#{sMot}" value="#{mot.lstStatuses}" var="sMot"></f:selectItems>
+	               							</h:selectOneMenu>
+							            </f:facet>
+									</p:cellEditor>
+								</p:column>
+	 							<p:column headerText="Depart From">
+							    	<p:cellEditor>
+							        	<f:facet name="output"><h:outputText value="#{movementLst.departLocationNum.nameLocation}" /></f:facet>
+							            <f:facet name="input">
+							            	<h:selectOneMenu converter="locationConverter" required="true" requiredMessage="Depart From is required" value="#{movementLst.departLocationNum}" style="width:100%">
+	               								<f:selectItems itemLabel="#{vLocation.nameLocation}" itemValue="#{vLocation}" value="#{location.lstLocations}" var="vLocation"></f:selectItems>
+	               							</h:selectOneMenu>
+							           	</f:facet>
+									</p:cellEditor>
+								</p:column>
+	       						<p:column headerText="Depart On">
+							    	<p:cellEditor>
+							        	<f:facet name="output">
+							        		<h:outputText value="#{movementLst.departDt}">
+							        			<f:convertDateTime pattern="MM/dd/yyyy" />
+							        		</h:outputText>
+							        	</f:facet>
+							            <f:facet name="input">
+							            	<p:calendar pattern="MM/dd/yyyy" required="true" requiredMessage="Depart On is required" value="#{movementLst.departDt}" style="width:100%">
+							            		<p:ajax event="dateSelect" listener="#{movementLst.onChangeDepartDate}"></p:ajax>
+							            	</p:calendar>
+							            </f:facet>
+									</p:cellEditor>
+								</p:column>
+								<p:column id="txtDuration" headerText="Duration">
+									<p:cellEditor>
+										<f:facet name="output">
+							        		<h:outputText value="#{movementLst.durationTm}">
+							        			<f:convertNumber type="number" groupingUsed="true" minFractionDigits="0" pattern="#0" />
+							        		</h:outputText>
+							        	</f:facet>
+							            <f:facet name="input">
+							            	<p:inputText value="#{movementLst.durationTm}" style="width:100%">
+							            		<f:convertNumber type="number" groupingUsed="true" minFractionDigits="0" pattern="#0" />
+							            		<p:ajax event="change" listener="#{movementLst.onChangeDuration}" update=":frmItinerary:tblMovement:txtArriveOn"></p:ajax>
+							            	</p:inputText>
+							            </f:facet>
+									</p:cellEditor>
+								</p:column>
+	 							<p:column headerText="Arrive At">
+							    	<p:cellEditor>
+							        	<f:facet name="output"><h:outputText value="#{movementLst.arriveLocationNum.nameLocation}" /></f:facet>
+							            <f:facet name="input">
+							            	<h:selectOneMenu converter="locationConverter" required="true" requiredMessage="Arrive At is required" value="#{movementLst.arriveLocationNum}" style="width:100%">
+	               								<f:selectItems itemLabel="#{vLocation.nameLocation}" itemValue="#{vLocation}" value="#{location.lstLocations}" var="vLocation"></f:selectItems>
+	               							</h:selectOneMenu>
+							           	</f:facet>
+									</p:cellEditor>
+								</p:column>
+	       						<p:column headerText="Arrive On">
+							    	<p:cellEditor>
+							        	<f:facet name="output">
+							        		<h:outputText style="text-align: center;" value="#{movementLst.arriveDt}">
+							        			<f:convertDateTime pattern="MM/dd/yyyy" />
+							        		</h:outputText>
+							        	</f:facet>
+							            <f:facet name="input">
+							            	<p:calendar id="txtArriveOn" pattern="MM/dd/yyyy" required="true" requiredMessage="Arrive On is required" value="#{movementLst.arriveDt}" style="width:100%" />
+							            </f:facet>
+									</p:cellEditor>
+								</p:column>
+								<p:column headerText="SI Date">
+									<p:cellEditor>
+										<f:facet name="output">
+											<h:outputText value="#{movementLst.actionCompletionDt}">
+												<f:convertDateTime pattern="MM/dd/yyyy" />
+											</h:outputText>
+										</f:facet>
+										<f:facet name="input">
+											<p:calendar pattern="MM/dd/yyyy" required="false" value="#{movementLst.actionCompletionDt}" style="width: 100%;" />
+										</f:facet>
+									</p:cellEditor>
+								</p:column>
+								<p:column headerText="Actions" style="width: 100px;">
+						        	<p:rowEditor />
+					        	 	<p:cellEditor>
+	                                	<f:facet name="output">
+	                                    	<p:commandLink actionListener="#{itinerary.removeMovement(movementLst)}" ajax="true" disabled="#{movementLst.transfer gt 0 ? true : false}" id="lnkRemoveMovement" process="@this" styleClass="row-trash icon-remove" update="tblMovement, :frmItinerary:missingTradeQty, :frmItinerary:grwNotification">
+	                                    		<p:confirm message="Are you sure about removing this movement and all its cargos?"></p:confirm>
+	                                    	</p:commandLink>
+	                                    	<pe:tooltip adjustX="-5" for="lnkRemoveMovement" myPosition="top, center" value="Remove movement" />
+	                                    	<p:commandLink actionListener="#{itinerary.retrieveNote(movementLst)}" disabled="#{itinerary.id eq '-1' ? true : false}" id="lnkAddNote" onclick="showDlgNote(this);" process="@this" styleClass="icon-file" style="margin-left: 60px; margin-top: -16px; position: absolute;" update=":frmItinerary:txtNote"></p:commandLink>
+	                                    	<pe:tooltip adjustX="-5" for="lnkAddNote" myPosition="top, center" value="Note" />
+	                                   </f:facet>
+	                                   <f:facet name="input"><h:outputText value="" /></f:facet>
+	                               </p:cellEditor>
+						       	</p:column>
+						       	<p:rowExpansion>
+						       		<div class="panel-detail">
+						       			<div class="panel panel-success col-md-12" style="margin-bottom: 0px;">
+											<div class="panel-heading">
+						                    	<h3 class="panel-title">Cargos</h3>
+											</div>
+						                    <div class="panel-body">
+						                    	<p:commandLink actionListener="#{movementLst.addCargo}" rendered="#{movementLst.cargoLst.size() eq 0 ? true : false}" style="margin-bottom: 14px;" styleClass="btn btn-success" update="tblCargo, :frmItinerary:grwNotification">
+						                    		<h:outputText value="Add Cargo" />
+						                    	</p:commandLink>
+						                    	
+						                    	<p:dataTable
+						        					editable="true"
+						        					editMode="cell"
+						                    		emptyMessage="No Cargos found. Please click on 'Add Cargo' button to add a new cargo."
+						                    		id="tblCargo"
+						                    		selection="#{movementLst.cargoId}"
+						                    		styleClass="data-table"
+						                    		value="#{movementLst.cargoLst}"
+						                    		var="cargoLst">
+		
+						                    		<p:ajax event="cellEdit" listener="#{movementLst.onCellEditForCargo}" update=":frmItinerary:grwNotification, :frmItinerary:missingTradeQty" />
+						                    		
+						                    		<p:column headerText="Cargo Number">
+						                    			<p:cellEditor>
+						                    				<f:facet name="output"><h:outputText value="#{cargoLst.numCargo}" /></f:facet>
+						                    				<f:facet name="input"><h:inputText disabled="true" value="#{cargoLst.numCargo}" /></f:facet>
+						                    			</p:cellEditor>
+						                    		</p:column>
+						                    		
+						                    		<p:column headerText="Cargo Name">
+												    	<p:cellEditor>
+												        	<f:facet name="output"><h:outputText value="#{cargoLst.nameCargo}" /></f:facet>
+												            <f:facet name="input"><p:inputText required="true" requiredMessage="Cargo Name is required" value="#{cargoLst.nameCargo}" style="width:100%" /></f:facet>
+														</p:cellEditor>
+													</p:column>
+													
+													<p:column headerText="Strategy">
+												    	<p:cellEditor>
+												        	<f:facet name="output"><h:outputText value="#{cargoLst.numStrategy.nameStrategy}" /></f:facet>
+												            <f:facet name="input">
+												            	<h:selectOneMenu converter="strategyConverter" disabled="true" required="true" requiredMessage="Strategy is required" value="#{cargoLst.numStrategy}" style="width:100%">
+						               								<f:selectItems itemLabel="#{vStrategy.nameStrategy}" itemValue="#{vStrategy}" value="#{strategy.lstStrategies}" var="vStrategy"></f:selectItems>
+						               							</h:selectOneMenu>
+												            </f:facet>
+														</p:cellEditor>
+													</p:column>
+													
+													<p:column headerText="Commodity">
+												    	<p:cellEditor>
+												        	<f:facet name="output"><h:outputText value="#{cargoLst.commodityCod.codCommodity}" /></f:facet>
+												            <f:facet name="input">
+												            	<h:selectOneMenu converter="commodityConverter" disabled="true" required="true" requiredMessage="Commodity is required" value="#{cargoLst.commodityCod}" style="width:100%">
+						               								<f:selectItems itemLabel="#{vCommodity.codCommodity}" itemValue="#{vCommodity}" value="#{commodity.lstCommodities}" var="vCommodity"></f:selectItems>
+						               							</h:selectOneMenu>
+												            </f:facet>
+														</p:cellEditor>
+													</p:column>
+													
+													<p:column headerText="Quantity UOM">
+												    	<p:cellEditor>
+												        	<f:facet name="output"><h:outputText value="#{cargoLst.qtyUomCod.codUom}" /></f:facet>
+												            <f:facet name="input">
+												            	<h:selectOneMenu converter="uomConverter" required="true" requiredMessage="Quantity UOM is required" value="#{cargoLst.qtyUomCod}" style="width:100%">
+						               								<f:selectItems itemLabel="#{vUom.codUom}" itemValue="#{vUom}" value="#{uom.lstUnitsOfMeasure}" var="vUom"></f:selectItems>
+						               							</h:selectOneMenu>
+												            </f:facet>
+														</p:cellEditor>
+													</p:column>
+													
+													<p:column headerText="Price Currency">
+												    	<p:cellEditor>
+												        	<f:facet name="output"><h:outputText value="#{cargoLst.currPriceCod.codcurr}" /></f:facet>
+												            <f:facet name="input">
+												            	<h:selectOneMenu converter="currencyConverter" required="true" requiredMessage="Price Currency is required" value="#{cargoLst.currPriceCod}" style="width:100%">
+						               								<f:selectItems itemLabel="#{vCurrency.codcurr}" itemValue="#{vCurrency}" value="#{currency.lstCurrencies}" var="vCurrency"></f:selectItems>
+						               							</h:selectOneMenu>
+												            </f:facet>
+														</p:cellEditor>
+													</p:column>
+													
+													<p:column headerText="Price UOM">
+												    	<p:cellEditor>
+												        	<f:facet name="output"><h:outputText value="#{cargoLst.prcUomCod.codUom}" /></f:facet>
+												            <f:facet name="input">
+												            	<h:selectOneMenu converter="uomConverter" required="true" requiredMessage="Price UOM is required" value="#{cargoLst.prcUomCod}" style="width:100%">
+						               								<f:selectItems itemLabel="#{vUom.codUom}" itemValue="#{vUom}" value="#{uom.lstUnitsOfMeasure}" var="vUom"></f:selectItems>
+						               							</h:selectOneMenu>
+												            </f:facet>
+														</p:cellEditor>
+													</p:column>
+													
+													<p:column headerText="MTM Curve">
+														<p:cellEditor>
+															<f:facet name="output"><h:outputText value="#{cargoLst.mtmCurveNum.coddefquote}" /></f:facet>
+															<f:facet name="input">
+																<h:selectOneMenu converter="curveConverter" required="true" requiredMessage="MTM Curve is required" value="#{cargoLst.mtmCurveNum}" style="width: 100%;">
+																	<f:selectItems itemLabel="#{vCommodityStrategy.coddefquote}" itemValue="#{vCommodityStrategy}" value="#{curve.lstCommodityStrategies}" var="vCommodityStrategy"></f:selectItems>
+																</h:selectOneMenu>
+															</f:facet>
+														</p:cellEditor>
+													</p:column>
+													
+													<p:column id="txtQuantity" headerText="Cargo Quantity">
+												    	<p:cellEditor>
+												        	<f:facet name="output">
+												        		<h:outputText value="#{cargoLst.capacity}">
+												        			<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#,###,##0.00" />
+												        		</h:outputText>
+												        	</f:facet>
+												            <f:facet name="input">
+												            	<p:inputText required="true" requiredMessage="Trade Quantity is required" value="#{cargoLst.capacity}" style="width:100%">
+												            		<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00" />
+												            	</p:inputText>
+												            </f:facet>
+														</p:cellEditor>
+													</p:column>
+													
+													<p:column style="width: 40px;">
+										        	 	<p:cellEditor>
+						                                	<f:facet name="output">
+						                                    	<p:commandLink actionListener="#{movementLst.removeCargo(cargoLst)}" ajax="true" disabled="#{movementLst.transfer gt 0 ? true : false}" id="lnkRemoveCargo" process="@this" styleClass="row-trash icon-remove" style="margin-left: 3px !important; margin-top: -10px !important;" update="tblCargo, :frmItinerary:missingTradeQty">
+						                                    		<p:confirm message="Are you sure about removing this cargo?"></p:confirm>
+						                                    	</p:commandLink>
+						                                    	<pe:tooltip adjustX="-5" for="lnkRemoveCargo" myPosition="top, center" value="Remove cargo" />
+						                                   </f:facet>
+						                                   <f:facet name="input"><h:outputText styleClass="row-trash icon-remove" style="color: #666666 !important; margin-left: 8px !important; margin-top: -10px !important; z-index: 1016;" value="" /></f:facet>
+						                               </p:cellEditor>
+											       	</p:column>
+					                    		</p:dataTable>
+						                    </div>
+										</div>
+					        			<div class="clearfix"></div>
+					        			<div class="panel panel-primary col-md-12">
+											<div class="panel-heading">
+						                    	<h3 class="panel-title">Transfers <small style="float: right; font-size: 10px; padding-top: 3px;">(Click on the plus icon to see a tag)</small></h3>
+											</div>
+						                    <div class="panel-body">
+						                    	<p:commandLink actionListener="#{itineraryTransfer.onAddTransfer(movementLst)}" onclick="PF('dlgTransfer').show()" process="@this" style="margin-bottom: 14px;" styleClass="btn btn-primary" update=":frmItinerary:txtTransferLoadDischarge, :frmItinerary:txtTransferOption, :frmItinerary:txtTransferLocation, :frmItinerary:txtTransferEffectiveDt, :frmItinerary:txtTransferCommencementDt, :frmItinerary:txtTransferBlNumber, :frmItinerary:txtTransferBlDate, :frmItinerary:tabTransfer:pnlFromType, :frmItinerary:tabTransfer:pnlToType">
+						                    		<h:outputText value="Add Transfer" />
+						                    	</p:commandLink>
+						                    	<p:commandLink actionListener="#{movementLst.onOpenTagAllocation}" process="@this" style="margin-bottom: 14px; margin-left: 10px;" styleClass="btn btn-primary">
+						                    		<h:outputText value="Allocate Tags" />
+						                    		<p:ajax event="dialogReturn" listener="#{movementLst.onSavedTagAllocation}" update=":frmItinerary:grwNotification, :frmItinerary:tblMovement" />
+						                    	</p:commandLink>
+						                    
+						                    	<p:dataTable
+						                    		editable="false"
+						        					editMode="cell"
+						                    		emptyMessage="No Transfers found."
+						                    		id="tblTransfer"
+						                    		selection="#{movementLst.transferId}"
+						                    		styleClass="data-table"
+						                    		value="#{movementLst.transferLst}"
+						                    		var="transferList">
+						                    		
+						                    		<p:ajax async="true" event="rowToggle" listener="#{itinerary.onRowExpandForTransfer}" update="tblTag" />
+						                    		
+						                    		<p:column style="width: 40px">
+											            <p:rowToggler />
+											        </p:column>
+						                    		
+						                    		<p:column headerText="Transfer Number">
+												        <p:cellEditor>
+						                    				<f:facet name="output"><h:outputText value="#{transferList.numTransfer}" /></f:facet>
+						                    				<f:facet name="input"><h:inputText disabled="true" value="#{transferList.numTransfer}" /></f:facet>
+						                    			</p:cellEditor>
+												    </p:column>
+												    
+												    <p:column headerText="Load/Discharge">
+												    	<p:cellEditor>
+															<f:facet name="output"><h:outputText value="#{transferList.loadDischargeObj.indValueName}" /></f:facet>
+															<f:facet name="input">
+																<h:selectOneMenu converter="loadDischargeConverter" disabled="#{transferList.numTransfer gt 0 ? true : false}" required="true" requiredMessage="Load/Discharge is required" style="width: 100%;" value="#{transferList.loadDischargeObj}">
+																	<f:selectItems itemLabel="#{vLoadDischarge.indValueName}" itemValue="#{vLoadDischarge}" value="#{loadDischarge.lstLoadDischarges}" var="vLoadDischarge"></f:selectItems>
+																</h:selectOneMenu>
+															</f:facet>
+														</p:cellEditor>
+												    </p:column>
+												    
+												    <p:column headerText="Option">
+												        <p:cellEditor>
+															<f:facet name="output"><h:outputText value="#{transferList.loadDischargeObj.indValueName eq 'Load From' ? transferList.fromTypeObj.indValueName : transferList.toTypeObj.indValueName}" /></f:facet>
+															<f:facet name="input">
+																<h:selectOneMenu converter="fromTypeConverter" disabled="#{transferList.numTransfer gt 0 ? true : false}" required="true" requiredMessage="From Type is required" style="width: 100%;" value="#{transferList.loadDischargeObj.indValueName eq 'Load From' ? transferList.fromTypeObj : transferList.toTypeObj}">
+																	<f:selectItems itemLabel="#{vFromType.indValueName}" itemValue="#{vFromType}" value="#{fromType.lstFromTypes}" var="vFromType"></f:selectItems>
+																</h:selectOneMenu>
+															</f:facet>
+														</p:cellEditor>
+												    </p:column>
+												    
+<!-- 												    <p:column headerText="To">
+												        <p:cellEditor>
+															<f:facet name="output"><h:outputText value="#{transferLst.toTypeObj.indValueName}" /></f:facet>
+															<f:facet name="input">
+																<h:selectOneMenu converter="fromTypeConverter" disabled="#{transferLst.numTransfer gt 0 ? true : false}" required="true" requiredMessage="To Type is required" style="width: 100%;" value="#{transferLst.toTypeObj}">
+																	<f:selectItems itemLabel="#{vToType.indValueName}" itemValue="#{vToType}" value="#{fromType.lstFromTypes}" var="vToType"></f:selectItems>
+																</h:selectOneMenu>
+															</f:facet>
+														</p:cellEditor>
+												    </p:column> -->
+												    
+												    <p:column headerText="POD/POL">
+												        <p:cellEditor>
+															<f:facet name="output"><h:outputText value="#{transferList.locationObj.nameLocation}" /></f:facet>
+															<f:facet name="input">
+																<h:selectOneMenu converter="locationConverter" disabled="#{transferList.numTransfer gt 0 ? true : false}" required="true" requiredMessage="Location is required" style="width: 100%;" value="#{transferList.locationObj}">
+																	<f:selectItems itemLabel="#{vLocation.nameLocation}" itemValue="#{vLocation}" value="#{location.lstLocations}" var="vLocation"></f:selectItems>
+																</h:selectOneMenu>
+															</f:facet>
+														</p:cellEditor>
+												    </p:column>
+												    
+												    <p:column headerText="Location">
+												    	<h:outputText value="#{transferList.loadDischargeObj.indValueName eq 'Discharge To' ? transferList.locationIdentifier : '--'}" />
+												    </p:column>
+												    
+												    <p:column headerText="Converted Qty">
+												        <p:cellEditor>
+						                    				<f:facet name="output">
+						                    					<h:outputText value="#{transferList.qtyTo}">
+						                    						<f:convertNumber type="number" groupingUsed="true" minFractionDigits="6" pattern="#,###,##0.000000" />
+						                    					</h:outputText>
+						                    				</f:facet>
+						                    				<f:facet name="input"><h:inputText disabled="#{transferList.numTransfer gt 0 ? true : false}" value="#{transferList.qtyTo}" /></f:facet>
+						                    			</p:cellEditor>
+												    </p:column>
+												    
+												    <p:column headerText="Effective Date">
+												    	<p:cellEditor>
+												    		<f:facet name="output">
+												    			<h:outputText value="#{transferList.dtEffective}">
+												    				<f:convertDateTime pattern="MM/dd/yyyy" />
+												    			</h:outputText>
+												    		</f:facet>
+												    		<f:facet name="input">
+												    			<p:calendar disabled="#{transferList.numTransfer gt 0 ? true: false}" patter="MM/dd/yyyy" required="true" requiredMessage="Effective Date is required" style="width: 100%;" value="#{transferList.dtEffective}" />
+												    		</f:facet>
+												    	</p:cellEditor>
+												    </p:column>
+												    
+												    <p:column headerText="Comm. Date">
+												        <p:cellEditor>
+															<f:facet name="output">
+																<h:outputText value="#{transferList.dtTransferComm}">
+																	<f:convertDateTime pattern="MM/dd/yyyy" />
+																</h:outputText>
+															</f:facet>
+															<f:facet name="input">
+																<p:calendar disabled="#{transferList.numTransfer gt 0 ? true : false}" pattern="MM/dd/yyyy" required="true" requiredMessage="Commencement Date is required" style="width: 100%;" value="#{transferList.dtTransferComm}" />
+															</f:facet>
+														</p:cellEditor>
+												    </p:column>
+						                    		
+						                    		<p:column headerText="BL Number">
+														<h:outputText value="#{transferList.loadDischargeObj.indValueName eq 'Load From' ? transferList.codBlNum : '--'}" />
+													</p:column>
+													
+													<p:column headerText="BL Date">
+														<h:outputText value="#{transferList.loadDischargeObj.indValueName eq 'Load From' ? transferList.dtBl : '--'}">
+															<f:convertDateTime patter="MM/dd/yyyy" />
+														</h:outputText>
+													</p:column>
+						                    		
+						                    		<p:column style="width: 40px;">
+										        	 	<p:cellEditor>
+						                                	<f:facet name="output">
+						                                    	<p:commandLink  actionListener="#{itineraryTransfer.onTransferVoid(transferLst)}" disabled="#{transferList.numTransfer gt 0 ? false : true}" id="lnkVoidTransfer" process="@this" styleClass="icon-close" style="color: #D24149; margin-left: 4px; margin-top: -10px; position: absolute;" update=":frmItinerary:grwNotification, :frmItinerary:tblMovement">
+						                                    		<p:confirm message="Are you sure about voiding this transfer?"></p:confirm>
+						                                    	</p:commandLink>
+	                                    						<pe:tooltip adjustX="-5" for="lnkVoidTransfer" myPosition="top, center" value="Void transfer" />
+						                                   </f:facet>
+						                                   <f:facet name="input"><h:outputText styleClass="row-trash icon-remove" style="color: #666666 !important; margin-left: 8px !important; margin-top: -10px !important; z-index: 1016;" value="" /></f:facet>
+						                               </p:cellEditor>
+											       	</p:column>
+						                    		
+						                    		<p:rowExpansion>
+											       		<div class="panel-detail" style="margin: 10px 0;">
+											       			<p:commandLink actionListener="#{transferList.addTag}" rendered="false" style="margin-bottom: 10px;" styleClass="btn btn-primary" update="tblTag">
+									                    		<h:outputText value="Add Tag" />
+									                    	</p:commandLink>
+											       		
+									        				<p:dataTable
+									                    		editable="false"
+									        					editMode="cell"
+									                    		emptyMessage="No Tags found."
+									                    		id="tblTag"
+									                    		selection="#{transferList.buildDrawTagId}"
+									                    		styleClass="data-table"
+									                    		value="#{transferList.tagLst}"
+									                    		var="tagLst">
+									                    		
+									                    		<f:facet name="header">
+																	<p:outputPanel style="text-align: left;">
+																		<h:outputText style="color: #00acec; font-weight: lighter;" value="Tags" />
+																	</p:outputPanel>
+																</f:facet>
+									                    		
+									                    		<p:column headerText="Type">
+															        <p:cellEditor>
+									                    				<f:facet name="output"><h:outputText value="#{tagLst.tagTypeCd}" /></f:facet>
+									                    				<f:facet name="input"><h:inputText disabled="true" value="#{tagLst.tagTypeCd}" /></f:facet>
+									                    			</p:cellEditor>
+															    </p:column>
+															    
+															    <p:column headerText="Chop Id">
+															        <p:cellEditor>
+									                    				<f:facet name="output"><h:outputText value="#{tagLst.chopId}" /></f:facet>
+									                    				<f:facet name="input"><h:inputText disabled="true" value="#{tagLst.chopId}" /></f:facet>
+									                    			</p:cellEditor>
+															    </p:column>
+															    
+															    <p:column headerText="Container">
+															        <p:cellEditor>
+									                    				<f:facet name="output"><h:outputText value="#{tagLst.tagValue1}" /></f:facet>
+									                    				<f:facet name="input"><h:inputText required="true" requiredMessage="Container is required" value="#{tagLst.tagValue1}" /></f:facet>
+									                    			</p:cellEditor>
+															    </p:column>
+									                    		
+									                    		<p:column headerText="ICO">
+															        <p:cellEditor>
+									                    				<f:facet name="output"><h:outputText value="#{tagLst.tagValue2}" /></f:facet>
+									                    				<f:facet name="input"><h:inputText required="true" requiredMessage="ICO is required" value="#{tagLst.tagValue2}" /></f:facet>
+									                    			</p:cellEditor>
+															    </p:column>
+															    
+															    <p:column headerText="Tag Qty">
+															        <p:cellEditor>
+									                    				<f:facet name="output">
+									                    					<h:outputText value="#{tagLst.tagQty}" style="float: right;">
+									                    						<f:convertNumber type="number" groupingUsed="true" minFractionDigits="6" pattern="#,###,##0.000000" />
+									                    					</h:outputText>
+									                    				</f:facet>
+									                    				<f:facet name="input"><h:inputText required="true" requiredMessage="Tag Qty is required" value="#{tagLst.tagQty}" /></f:facet>
+									                    			</p:cellEditor>
+															    </p:column>
+															    
+															    <p:column headerText="Tag Qty UOM">
+															        <p:cellEditor>
+									                    				<f:facet name="output"><h:outputText value="#{tagLst.tagQtyUomCd}" /></f:facet>
+									                    				<f:facet name="input"><h:inputText disabled="true" value="#{tagLst.tagQtyUomCd}" /></f:facet>
+									                    			</p:cellEditor>
+															    </p:column>
+															    
+															    <p:column headerText="Tag Allocated Qty" rendered="#{transferList.loadDischargeObj.indValueName eq 'Discharge To' ? false : true}">
+															        <p:cellEditor>
+									                    				<f:facet name="output">
+									                    					<h:outputText value="#{tagLst.tagAllocQty}" style="float: right;">
+									                    						<f:convertNumber type="number" groupingUsed="true" minFractionDigits="6" pattern="#,###,##0.000000" />
+									                    					</h:outputText>
+									                    				</f:facet>
+									                    				<f:facet name="input"><h:inputText value="#{tagLst.tagAllocQty}" /></f:facet>
+									                    			</p:cellEditor>
+															    </p:column>
+															    
+<!-- 															    <p:column style="width: 40px;"> -->
+<!-- 													        	 	<p:cellEditor> -->
+<!-- 									                                	<f:facet name="output"> -->
+<!-- 									                                    	<p:commandLink actionListener="#{transferLst.removeTag(tagLst)}" ajax="true" disabled="#{transferLst.numTransfer gt 0 ? true : false}" id="lnkRemoveTag" process="@this" styleClass="row-trash icon-remove" style="margin-left: 3px !important; margin-top: -10px !important;" update="tblTag"></p:commandLink> -->
+<!-- 									                                    	<pe:tooltip adjustX="-5" for="lnkRemoveTag" myPosition="top, center" value="Remove transfer" /> -->
+<!-- 									                                   </f:facet> -->
+<!-- 									                                   <f:facet name="input"><h:outputText styleClass="row-trash icon-remove" style="color: #666666 !important; margin-left: 8px !important; margin-top: -10px !important; z-index: 1016;" value="" /></f:facet> -->
+<!-- 									                               </p:cellEditor> -->
+<!-- 														       	</p:column> -->
+									                    		
+									                    		<p:columnGroup type="footer">
+									                    			<p:row>
+										                    			<p:column footerText="" style="background: #fcfddb; border: none;" />
+										                    			<p:column footerText="" style="background: #fcfddb; border: none;" />
+										                    			<p:column footerText="" style="background: #fcfddb; border: none;" />
+										                    			<p:column footerText="" style="background: #fcfddb; border: none;" />
+										                    			<p:column footerText="" style="background: #fcfddb; border: none; font-weight: normal; text-align: right;">
+									                    					<f:facet name="footer">
+										                    					<h:outputText value="#{transferList.tagQty}">
+										                    						<f:convertNumber pattern="#,###,##0.000000" type="number" />
+										                    					</h:outputText>
+										                    				</f:facet>
+										                    			</p:column>
+										                    			<p:column footerText="" style="background: #fcfddb; border: none;" />
+										                    			<p:column footerText="" style="background: #fcfddb; border: none; font-weight: normal; text-align: right;" rendered="#{transferList.loadDischargeObj.indValueName eq 'Discharge To' ? false : true}">
+									                    					<f:facet name="footer">
+										                    					<h:outputText value="#{transferList.tagAllocQty}">
+										                    						<f:convertNumber pattern="#,###,##0.000000" type="number" />
+										                    					</h:outputText>
+										                    				</f:facet>
+										                    			</p:column>
+										                    		</p:row>
+										                    	</p:columnGroup>
+									                    		
+								                    		</p:dataTable>
+														</div>
+						                    		</p:rowExpansion>
+						                    		
+						                    	</p:dataTable>
+						                    </div>
+										</div>
+						       		</div>
+						       	</p:rowExpansion>
+							</p:dataTable>
+						</div>
+					</div>
+	        		<div class="clearfix"></div>
+	        		<div class="actions">
+	        			<p:commandButton actionListener="#{itinerary.saveItinerary}" process="@this" styleClass="btn btn-success" update=":frmItinerary, :frmItinerary:txtTradeNumber, :frmItinerary:txtItineraryName, :frmItinerary:tradeQty, :frmItinerary:missingTradeQty, :frmItinerary:contractUomCd, :frmItinerary:missingContractUomCd, :frmItinerary:pnlBag, :frmItinerary:tblMovement, :frmItinerary:grwNotification" value="Save">
+							<!-- <p:confirm message="Are you sure about saving the itinerary without any match obligation?"></p:confirm> -->
+						</p:commandButton>
+						<p:link outcome="itinerarylst" style="margin-right: 20px;" styleClass="btn btn-default" value="Cancel"></p:link>
+						<!-- <p:panel style="#{itinerary.id eq '-1' ? 'display: inline-block;' : 'display: none;'}" styleClass="panel-default"> -->
+							<p:commandLink actionListener="#{itinerary.onShowMatchObligation}" onclick="showMatchObligation(this)" styleClass="btn btn-default" update=":frmItinerary:grwNotification" value="Match Obligation"></p:commandLink>
+						<!-- </p:panel> -->
+					</div>
+					
+					<div class="pnl-float-info col-md-12">
+						<p:commandLink actionListener="#{itinerary.addMatchObligation}" oncomplete="#{itinerary.matchObligationLst.size() le 0 ? 'onRowExpandForMatchObligation()' : ''}" style="margin-bottom: 20px;" styleClass="btn btn-success pull-right" update="tblMatchObligation, :frmItinerary:grwNotification">
+                    		<h:outputText value="Add Match Obligation" />
+                    	</p:commandLink>
+						<p:dataTable
+	                    		editable="true"
+	                    		editMode="cell"
+	                    		emptyMessage="Please click on 'Add Match Obligation' button to add a new match obligation."
+	                    		id="tblMatchObligation"
+	                    		rowIndexVar="rowIndex"
+	                    		styleClass="data-table"
+	                    		value="#{itinerary.matchObligationLst}"
+								var="matchObligationId">
+	                    		
+	                    		<p:column style="width: 40px;">
+						            <p:rowToggler />
+						        </p:column>
+						        
+						        <p:column headerText="#" style="text-align: center; width: 60px">
+	                    			<h:outputText style="color: #666666; font-weight: bold;" value="#{rowIndex + 1}" />
+	                    		</p:column>
+						        
+						        <p:column headerText="Match Number" id="txtMatchNumber">
+						        	<p:cellEditor>
+						        		<f:facet name="output"><h:outputText value="#{matchObligationId.id.obligationMatchNum}" /></f:facet>
+										<f:facet name="input"><h:inputText value="matchObligationId.id.obligationMatchNum" /></f:facet>
+						        	</p:cellEditor>
+						        </p:column>
+						        
+						        <p:column headerText="Match Description">
+						        	<p:cellEditor>
+						        		<f:facet name="output"><h:outputText value="#{matchObligationId.id.matchDesc}" /></f:facet>
+						        		<f:facet name="input">
+						        			<h:selectOneMenu style="width: 100%;" value="#{matchObligationId.id.matchDesc}">
+						        				<f:selectItem itemLabel="Select One" itemValue="" />
+						        				<f:selectItems itemLabel="#{vMovNum}" itemValue="#{vMovNum.toString()}" value="#{itinerary.movementsNumber}" var="vMovNum"></f:selectItems>
+						        			</h:selectOneMenu>
+						        		</f:facet>
+						        	</p:cellEditor>
+						        </p:column>
+						        
+						        <p:column headerText="Match Status">
+						        	<p:cellEditor>
+						        		<f:facet name="output"><h:outputText value="Scheduled/Allocated" /></f:facet>
+						        		<f:facet name="input"><h:inputText value="Scheduled/Allocated" /></f:facet>
+						        	</p:cellEditor>
+						        </p:column>
+						       	
+						       	<p:column headerText="Actions" style="width: 100px;">
+					        	 	<p:cellEditor>
+	                                	<f:facet name="output">
+	                                    	<p:commandLink actionListener="#{itinerary.removeMatchObligation(matchObligationId)}" ajax="true" disabled="#{matchObligationId.id.obligationMatchNum gt 0 ? true : false}" id="lnkRemoveMatchObligation" process="@this" styleClass="icon-remove" update="tblMatchObligation"></p:commandLink>
+	                                    	<pe:tooltip adjustX="-5" for="lnkRemoveMatchObligation" myPosition="top, center" value="Remove match obligation" />
+	                                    	<p:commandLink actionListener="#{itinerary.updateMatchObligationSource(matchObligationId)}" disabled="#{matchObligationId.id.obligationMatchNum gt 0 ? true : false}" id="lnkViewMatchObligation" onclick="showDlgMatchObligation(this);" process="@this" styleClass="icon-search" style="margin-left: 20px !important;"></p:commandLink>
+	                                    	<pe:tooltip adjustX="-5" for="lnkViewMatchObligation" myPosition="top, center" value="Find match obligation" />
+	                                    	<p:commandLink actionListener="#{itinerary.voidMatchObligation(matchObligationId)}" disabled="#{matchObligationId.id.obligationMatchNum gt 0 ? false : true}" id="lnkVoidMO" process="@this" style="color: #D24149; margin-left: 18px;" styleClass="icon-link" update=":frmItinerary:grwNotification, tblMatchObligation">
+							            		<p:confirm message="Are you sure about voiding this match obligation?"></p:confirm>
+							            	</p:commandLink>
+							            	<pe:tooltip adjustX="-5" for="lnkVoidMO" myPosition="top, center" value="Void match obligation" />  
+	                                   </f:facet>
+	                                   <f:facet name="input"><h:outputText styleClass="row-trash icon-remove" style="color: #666666 !important; margin-left: 8px !important; margin-top: -10px !important; z-index: 1016;" value="" /></f:facet>
+	                               </p:cellEditor>
+						       	</p:column>
+						       	
+						       	<p:rowExpansion>
+						       		<div class="panel-detail" style="margin: 10px 0;">
+							       		<div class="panel panel-plain">
+											<div class="panel-heading">
+						                    	<h3 class="panel-title">Trade Contract - Purchase <small style="float: right; font-size: 10px; padding-top: 3px;">(Click on 'Scheduled Qty' cell for editing)</small></h3>
+											</div>
+						                    <div class="panel-body">
+						                    	<p:dataTable
+						                    		editable="true"
+						        					editMode="cell"
+						                    		emptyMessage="No trade contract (purchase) found. Please insert a new trade contract corresponding to a purchase."
+						                    		id="tblPurchase"
+						                    		styleClass="data-table"
+						                    		value="#{matchObligationId.id.pTradeInputId}"
+						                    		var="pTradeInputId">
+						                    		
+						                    		<p:ajax event="cellEdit" listener="#{itinerary.onCellEditPurchase(matchObligationId.id.pTradeInputId)}" update=":frmItinerary:grwNotification" />
+						                    		
+						                    		<p:column headerText="Trade Number" styleClass="column-normal">
+												    	<p:cellEditor>
+												        	<f:facet name="output"><h:outputText value="#{pTradeInputId.tradeNum}" /></f:facet>
+												        	<f:facet name="input"><p:inputText disabled="true" value="#{pTradeInputId.tradeNum}" style="width:100%" /></f:facet>
+														</p:cellEditor>
+													</p:column>
+													
+													<p:column headerText="Buy / Sell" styleClass="column-normal">
+												    	<p:cellEditor>
+												        	<f:facet name="output"><h:outputText value="#{pTradeInputId.buySell}" /></f:facet>
+												        	<f:facet name="input"><p:inputText disabled="true" value="#{pTradeInputId.buySell}" style="width:100%" /></f:facet>
+														</p:cellEditor>
+													</p:column>
+													
+													<p:column headerText="Commodity" styleClass="column-normal">
+												    	<p:cellEditor>
+												        	<f:facet name="output"><h:outputText value="#{pTradeInputId.cmdtyCd}" /></f:facet>
+												        	<f:facet name="input"><p:inputText disabled="true" value="#{pTradeInputId.cmdtyCd}" style="width:100%" /></f:facet>
+														</p:cellEditor>
+													</p:column>
+													
+													<p:column headerText="Counterpart" styleClass="column-normal">
+														<p:cellEditor>
+															<f:facet name="output"><h:outputText value="#{pTradeInputId.counterpart}" /></f:facet>
+															<f:facet name="input"><p:inputText disabled="true" value="#{pTradeInputId.counterpart}" style="width: 100%;" /></f:facet>
+														</p:cellEditor>
+													</p:column>
+													
+													<p:column headerText="UOM Code" styleClass="column-normal">
+												    	<p:cellEditor>
+												        	<f:facet name="output"><h:outputText value="#{pTradeInputId.contractUomCd}" /></f:facet>
+												        	<f:facet name="input"><p:inputText disabled="true" value="#{pTradeInputId.contractUomCd}" style="width:100%" /></f:facet>
+														</p:cellEditor>
+													</p:column>
+										
+													<p:column headerText="Price Currency" styleClass="column-normal">
+												    	<p:cellEditor>
+												        	<f:facet name="output"><h:outputText value="#{pTradeInputId.settlementCurrCd}" /></f:facet>
+												        	<f:facet name="input"><p:inputText disabled="true" value="#{pTradeInputId.settlementCurrCd}" style="width:100%" /></f:facet>
+														</p:cellEditor>
+													</p:column>
+													
+													<p:column headerText="Price UOM" styleClass="column-normal">
+												    	<p:cellEditor>
+												        	<f:facet name="output"><h:outputText value="#{pTradeInputId.priceUomCd}" /></f:facet>
+												        	<f:facet name="input"><p:inputText disabled="true" value="#{pTradeInputId.priceUomCd}" style="width:100%" /></f:facet>
+														</p:cellEditor>
+													</p:column>
+													
+													<p:column headerText="Trade Quantity" styleClass="column-green">
+												    	<p:cellEditor>
+												        	<f:facet name="output">
+												        		<h:outputText style="float: right !important;" value="#{pTradeInputId.tradeQty}">
+												        			<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00"/>
+												        		</h:outputText>
+												        	</f:facet>
+												        	<f:facet name="input">
+												        		<p:inputText disabled="true" value="#{pTradeInputId.tradeQty}" style="width:100%">
+												        			<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00" />
+												        		</p:inputText>
+												        	</f:facet>
+														</p:cellEditor>
+													</p:column>
+													
+													<p:column headerText="Open Quantity" styleClass="column-red">
+												    	<p:cellEditor>
+												        	<f:facet name="output">
+												        		<h:outputText style="float: right !important;" value="#{pTradeInputId.openQty}">
+												        			<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00"/>
+												        		</h:outputText>
+												        	</f:facet>
+												        	<f:facet name="input">
+												        		<p:inputText disabled="true" value="#{pTradeInputId.openQty}" style="width:100%">
+												        			<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00" />
+												        		</p:inputText>
+												        	</f:facet>
+														</p:cellEditor>
+													</p:column>
+													
+													<p:column headerText="Scheduled Qty" styleClass="column-orange">
+														<p:cellEditor>
+															<f:facet name="output">
+																<h:outputText style="float: right !important;" value="#{pTradeInputId.scheduledQty}">
+																	<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00" />
+																</h:outputText>
+															</f:facet>
+															<f:facet name="input">
+																<p:inputText style="width: 100%;" value="#{pTradeInputId.scheduledQty}">
+																	<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00" />
+																</p:inputText>
+															</f:facet>
+														</p:cellEditor>
+													</p:column>
+												</p:dataTable>
+						                    </div>
+					                    </div>
+		                    			<div class="panel panel-plain" style="margin-bottom: 0px;">
+											<div class="panel-heading">
+						                    	<h3 class="panel-title">Trade Contract - Sell <small style="float: right; font-size: 10px; padding-top: 3px;">(Click on 'Scheduled Qty' cell for editing)</small></h3>
+											</div>
+						                    <div class="panel-body">
+						                    	<div class="row show-grid">
+						                    		<div class="col-md-1">
+							                    		<h:outputLabel styleClass="control-label" value="Trade Number" />
+							                    	</div>
+							                    	<div class="col-md-4 col-sm-4">
+							        					<p:inputText id="txtTradeContractNumber" styleClass="form-control" value="#{matchObligationId.id.tradeContractNumber}"></p:inputText>
+							        				</div>
+							        				<div class="col-md-1" style="margin-left: 24px;">
+							        					<p:commandLink actionListener="#{itinerary.addSellTradeContract(matchObligationId)}" styleClass="btn btn-secondary" update=":frmItinerary:grwNotification, :frmItinerary:tblMatchObligation:txtTradeContractNumber, :frmItinerary:tblMatchObligation:tblSell, :frmItinerary:tblMatchObligation:pnlRemoveTradeContract">
+							        						<h:outputText value="Add Trade Contract (Sell)" />
+							        					</p:commandLink>
+							        				</div>
+							        				<div class="col-md-1" style="margin-left: 76px;">
+							        					<p:panel id="pnlRemoveTradeContract" styleClass="panel-default" >
+								        					<p:commandLink actionListener="#{itinerary.removeSellTradeContract(matchObligationId)}" rendered="#{itinerary.tradeContract}" styleClass="btn btn-fourty" update=":frmItinerary:tblMatchObligation:txtTradeContractNumber, :frmItinerary:tblMatchObligation:tblSell, :frmItinerary:tblMatchObligation:pnlRemoveTradeContract" value="Remove Trade Contract (Sell)">
+								        						<p:confirm message="Are you sure about removing this trade contract?"></p:confirm>
+								        					</p:commandLink>
+							        					</p:panel>
+							        				</div>
+						        				</div>
+						        				
+						        				<p:dataTable
+						        					editable="true"
+						        					editMode="cell"
+						                    		emptyMessage="No trade contract (sell) found. Please insert a new trade contract corresponding to a sell."
+						                    		id="tblSell"
+						                    		styleClass="data-table"
+						                    		value="#{matchObligationId.id.sTradeInputId}"
+						                    		var="sTradeInputId">
+						                    		
+						                    		<p:ajax event="cellEdit" listener="#{itinerary.onCellEditSell(matchObligationId.id.pTradeInputId, matchObligationId.id.sTradeInputId)}" update=":frmItinerary:grwNotification" />
+						                    		
+						                    		<p:column headerText="Trade Number" styleClass="column-normal">
+												    	<p:cellEditor>
+												        	<f:facet name="output"><h:outputText value="#{sTradeInputId.tradeNum}" /></f:facet>
+												        	<f:facet name="input"><p:inputText disabled="true" value="#{sTradeInputId.tradeNum}" style="width:100%" /></f:facet>
+														</p:cellEditor>
+													</p:column>
+													
+													<p:column headerText="Buy / Sell" styleClass="column-normal">
+												    	<p:cellEditor>
+												        	<f:facet name="output"><h:outputText value="#{sTradeInputId.buySell}" /></f:facet>
+												        	<f:facet name="input"><p:inputText disabled="true" value="#{sTradeInputId.buySell}" style="width:100%" /></f:facet>
+														</p:cellEditor>
+													</p:column>
+													
+													<p:column headerText="Commodity" styleClass="column-normal">
+												    	<p:cellEditor>
+												        	<f:facet name="output"><h:outputText value="#{sTradeInputId.cmdtyCd}" /></f:facet>
+												        	<f:facet name="input"><p:inputText disabled="true" value="#{sTradeInputId.cmdtyCd}" style="width:100%" /></f:facet>
+														</p:cellEditor>
+													</p:column>
+													
+													<p:column headerText="Counterpart" styleClass="column-normal">
+														<p:cellEditor>
+															<f:facet name="output"><h:outputText value="#{sTradeInputId.counterpart}" /></f:facet>
+															<f:facet name="input"><p:inputText disabled="true" value="#{sTradeInputId.counterpart}" style="width: 100%;" /></f:facet>
+														</p:cellEditor>
+													</p:column>
+													
+													<p:column headerText="UOM Code" styleClass="column-normal">
+												    	<p:cellEditor>
+												        	<f:facet name="output"><h:outputText value="#{sTradeInputId.contractUomCd}" /></f:facet>
+												        	<f:facet name="input"><p:inputText disabled="true" value="#{sTradeInputId.contractUomCd}" style="width:100%" /></f:facet>
+														</p:cellEditor>
+													</p:column>
+													
+													<p:column headerText="Price Currency" styleClass="column-normal">
+												    	<p:cellEditor>
+												        	<f:facet name="output"><h:outputText value="#{sTradeInputId.settlementCurrCd}" /></f:facet>
+												        	<f:facet name="input"><p:inputText disabled="true" value="#{sTradeInputId.settlementCurrCd}" style="width:100%" /></f:facet>
+														</p:cellEditor>
+													</p:column>
+													
+													<p:column headerText="Price UOM" styleClass="column-normal">
+												    	<p:cellEditor>
+												        	<f:facet name="output"><h:outputText value="#{sTradeInputId.priceUomCd}" /></f:facet>
+												        	<f:facet name="input"><p:inputText disabled="true" value="#{sTradeInputId.priceUomCd}" style="width:100%" /></f:facet>
+														</p:cellEditor>
+													</p:column>
+													
+													<p:column headerText="Trade Quantity" styleClass="column-green">
+												    	<p:cellEditor>
+												        	<f:facet name="output">
+												        		<h:outputText style="float: right !important;" value="#{sTradeInputId.tradeQty}">
+												        			<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00" />
+												        		</h:outputText>
+												        	</f:facet>
+												        	<f:facet name="input">
+												        		<p:inputText disabled="true" value="#{sTradeInputId.tradeQty}" style="width:100%">
+												        			<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00" />
+												        		</p:inputText>
+												        	</f:facet>
+														</p:cellEditor>
+													</p:column>
+													
+													<p:column headerText="Open Quantity" styleClass="column-red">
+												    	<p:cellEditor>
+												        	<f:facet name="output">
+												        		<h:outputText style="float: right !important;" value="#{sTradeInputId.openQty}">
+												        			<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00" />
+												        		</h:outputText>
+												        	</f:facet>
+												        	<f:facet name="input">
+												        		<p:inputText disabled="true" value="#{sTradeInputId.openQty}" style="width:100%">
+												        			<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00" />
+												        		</p:inputText>
+												        	</f:facet>
+														</p:cellEditor>
+													</p:column>
+													
+													<p:column headerText="Scheduled Qty" styleClass="column-orange">
+														<p:cellEditor>
+															<f:facet name="output">
+																<h:outputText style="float: right !important;" value="#{sTradeInputId.scheduledQty}">
+																	<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00" />
+																</h:outputText>
+															</f:facet>
+															<f:facet name="input">
+																<p:inputText style="width: 100%;" value="#{sTradeInputId.scheduledQty}">
+																	<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00" />
+																</p:inputText>
+															</f:facet>
+														</p:cellEditor>
+													</p:column>
+												</p:dataTable>
+						                    </div>
+					                    </div>
+				                    </div>
+						       	</p:rowExpansion>
+						       	
+						       	<f:facet name="footer">
+						       		<div style="margin-top: 16px;">
+										<p:commandLink actionListener="#{itinerary.saveMatchObligation}" partialSubmit="true" process="@this" styleClass="btn btn-success" update=":frmItinerary:grwNotification, :frmItinerary:tblMatchObligation" value="Do Match Obligation" />
+									</div>
+						       	</f:facet>
+						</p:dataTable>
+					</div>
+		        </div>
+			</div>
+			</div>
+				<p:dialog draggable="true" dynamic="true" id="dlgNote" resizable="false" style="border: 1px solid #ddd;" styleClass="dlg-default" widgetVar="dlgNote">
+					<p:editor id="txtNote" value="#{itinerary.note}" width="600" />
+					<br />
+					<p:commandButton actionListener="#{itinerary.saveNote}" partialSubmit="true" process="@this, :frmItinerary:txtNote" styleClass="btn btn-success" style="background: #006633; border: none; box-shadow: none; font-weight: normal; text-shadow: none; -moz-box-shadow: none; -webkit-box-shadow: none;" update=":frmItinerary:grwNotification, :frmItinerary:tblMovement" value="Save Note"></p:commandButton>
+				</p:dialog>
+				<p:dialog draggable="true" dynamic="true" header="Add Transfer" height="560" id="dlgTransfer" modal="true" resizable="true" styleClass="dlg-default" widgetVar="dlgTransfer" width="1220">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="col-sm-4">
+								<label class="control-label">Load/Discharge</label>
+							</div>
+							<div class="col-sm-4">
+								<label class="control-label">Option</label>
+							</div>
+							<div class="col-sm-4">
+								<label class="control-label">Location</label>
+							</div>
+						</div>
+						<div class="clearfix"></div>
+						<div class="col-md-12">
+							<div class="col-sm-4">
+								<p:selectOneMenu converter="loadDischargeConverter" id="txtTransferLoadDischarge" styleClass="control-select" value="#{itineraryTransfer.loadDischargeObj}">
+      								<p:ajax event="change" global="false" listener="#{itineraryTransfer.onLoadDischargeSelect}" process="@this, txtTransferOption," update="txtTransferLocation, txtTransferEffectiveDt, txtTransferCommencementDt, :frmItinerary:tabTransfer:pnlFromType, :frmItinerary:tabTransfer:pnlToType" />
+									<f:selectItems itemLabel="#{vLoadDischarge.indValueName}" itemValue="#{vLoadDischarge}" value="#{loadDischarge.lstLoadDischarges}" var="vLoadDischarge"></f:selectItems>
+								</p:selectOneMenu>
+							</div>
+							<div class="col-sm-4">
+								<p:selectOneMenu converter="fromTypeConverter" id="txtTransferOption" styleClass="control-select" value="#{itineraryTransfer.optionObj}">
+      								<p:ajax event="change" global="false" listener="#{itineraryTransfer.onFromTypeSelect}" process="@this, txtTransferLoadDischarge" update="txtTransferEffectiveDt, txtTransferCommencementDt, :frmItinerary:tabTransfer:pnlFromType, :frmItinerary:tabTransfer:pnlToType"></p:ajax>
+									<f:selectItems itemLabel="#{vFromType.indValueName}" itemValue="#{vFromType}" value="#{fromType.lstFromTypes}" var="vFromType"></f:selectItems>
+								</p:selectOneMenu>
+							</div>
+							<div class="col-sm-4">
+								<p:inputText disabled="true" id="txtTransferLocation" styleClass="form-control" value="#{itineraryTransfer.locationObj.nameLocation}" />
+							</div>
+						</div>
+						<div class="clearfix"></div>
+						<div class="col-md-12">
+							<div class="col-sm-4">
+								<label class="control-label">Effective Dt.</label>
+							</div>
+							<div class="col-sm-4">
+								<label class="control-label">Commencement Dt.</label>
+							</div>
+							<div class="col-sm-4"></div>
+						</div>
+						<div class="clearfix"></div>
+						<div class="col-md-12">
+							<div class="col-sm-4">
+								<p:calendar id="txtTransferEffectiveDt" pattern="MM/dd/yyyy" value="#{itineraryTransfer.effectiveDt}" style="width: 400px !important;" />
+							</div>
+							<div class="col-sm-4">
+								<p:calendar id="txtTransferCommencementDt" pattern="MM/dd/yyyy" value="#{itineraryTransfer.commencementDt}" style="width: 400px !important;" />
+							</div>
+							<div class="col-sm-4"></div>
+						</div>
+						<div class="clearfix"></div>
+						<div class="col-md-12">
+							<div class="col-sm-4">
+								<label class="control-label">B/L Number</label>
+							</div>
+							<div class="col-sm-4">
+								<label class="control-label">B/L Date</label>
+							</div>
+							<div class="col-sm-4"></div>
+						</div>
+						<div class="clearfix"></div>
+						<div class="col-md-12">
+							<div class="col-sm-4">
+								<p:inputText id="txtTransferBlNumber" style="width: 99.6% !important;" styleClass="form-control" value="#{itineraryTransfer.blNumber}" />
+							</div>
+							<div class="col-sm-4">
+								<p:calendar id="txtTransferBlDate" pattern="MM/dd/yyyy" value="#{itineraryTransfer.blDate}" style="width: 400px !important;" />
+							</div>
+							<div class="col-sm-4"></div>
+						</div>
+					</div>
+					<div class="clearfix"></div>
+					<div class="row">
+        				<div class="col-md-12">
+        					<p:tabView id="tabTransfer" styleClass="nav nav-tabs">
+        						<p:tab title="Transfer">
+        							<div class="col-md-6" style="padding-right: 10px;">
+			        					<div class="form-horizontal">
+			        						<h3 class="heading-a">Transfer From</h3>
+			        						<p:panel id="pnlFromType" styleClass="panel-default">
+			        							<p:panel styleClass="panel-default" visible="#{itineraryTransfer.fromTrade}">
+				        							<div class="form-group">
+				        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Trade Number</label>
+				        								<div class="col-sm-3">
+				        									<p:inputText disabled="true" styleClass="form-control" value="#{itineraryTransfer.tradeInput.tradeNum}"></p:inputText>
+				        								</div>
+				        							</div>
+				        							<div class="form-group">
+				        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Scheduled Qty</label>
+				        								<div class="col-sm-3">
+				        									<p:inputText id="txtFromScheduledQty" styleClass="form-control" value="#{itineraryTransfer.scheduledQty}">
+				        										<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00"/>
+				        										<p:ajax event="keyup" global="false" listener="#{itineraryTransfer.onQtyChange('0')}" process="@this" update="txtFromNominalQty, txtToCargoQty, txtToStorageQty"></p:ajax>
+				        									</p:inputText>
+				        								</div>
+				        							</div>
+				        							<div class="form-group">
+				        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Nominal Qty</label>
+				        								<div class="col-sm-3">
+				        									<p:inputText disabled="true" id="txtFromNominalQty" styleClass="form-control" value="#{itineraryTransfer.nominalQty}">
+				        										<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00"/>
+				        									</p:inputText>
+				        								</div>
+				        							</div>
+				        						</p:panel>
+				        						<p:panel styleClass="panel-default" visible="#{itineraryTransfer.fromStorage}">
+				        							<div class="form-group">
+				        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Storage</label>
+				        								<div class="col-sm-3">
+				        									<p:selectOneMenu converter="storageConverter" filter="true" filterMatchMode="contains" style="width: 100%;" styleClass="control-select" value="#{itineraryTransfer.storage}">
+				        										<p:ajax event="change" global="false" listener="#{itineraryTransfer.onStorageSelect}" update="txtFromLevel"></p:ajax>
+																<f:selectItems itemLabel="#{vStorage.codStorage}" itemValue="#{vStorage}" value="#{storage.lstStorages}" var="vStorage"></f:selectItems>
+															</p:selectOneMenu>
+				        								</div>
+				        							</div>
+				        							<div class="form-group">
+				        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Level</label>
+				        								<div class="col-sm-3">
+				        									<p:selectOneMenu converter="cargoConverter" filter="true" filterMatchMode="contains" id="txtFromLevel" style="width: 100%;" styleClass="control-select" value="#{itineraryTransfer.level}">
+																<f:selectItems itemLabel="#{vLevel.id.nameCargo}" itemValue="#{vLevel}" value="#{itineraryTransfer.levelLst}" var="vLevel"></f:selectItems>
+															</p:selectOneMenu>
+				        								</div>
+				        							</div>
+				        							<div class="form-group">
+				        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Storage Qty</label>
+				        								<div class="col-sm-3">
+				        									<p:inputText id="txtFromStorageQty" styleClass="form-control" value="#{itineraryTransfer.storageQty}">
+				        										<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00"/>
+				        										<p:ajax event="keyup" global="false" listener="#{itineraryTransfer.onQtyChange('2')}" process="@this" update="txtToScheduledQty, txtToNominalQty, txtToCargoQty"></p:ajax>
+				        									</p:inputText>
+				        								</div>
+				        							</div>
+				        						</p:panel>
+				        						<p:panel styleClass="panel-default" visible="#{itineraryTransfer.fromVessel}">
+				        							<div class="form-group">
+				        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Vehicle</label>
+				        								<div class="col-sm-3">
+				        									<p:inputText disabled="true" styleClass="form-control" value="#{itineraryTransfer.vehicle.equipmentNum} - #{itineraryTransfer.vehicle.motTypeInd.indValueName} - #{itineraryTransfer.vehicle.motNum}"></p:inputText>
+				        								</div>
+				        							</div>
+				        							<div class="form-group">
+				        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Cargo</label>
+				        								<div class="col-sm-3">
+				        									<p:inputText disabled="true" styleClass="form-control" value="#{itineraryTransfer.cargo.numCargo} - #{itineraryTransfer.cargo.nameCargo} - #{itineraryTransfer.cargo.codCommodity}"></p:inputText>
+				        								</div>
+				        							</div>
+				        							<div class="form-group">
+				        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Cargo Qty</label>
+				        								<div class="col-sm-3">
+				        									<p:inputText id="txtFromCargoQty" styleClass="form-control" value="#{itineraryTransfer.cargoQty}">
+				        										<p:ajax event="keyup" global="false" listener="#{itineraryTransfer.onQtyChange('1')}" process="@this" update="txtToScheduledQty txtToNominalQty, txtToStorageQty"></p:ajax>
+				        									</p:inputText>
+				        								</div>
+				        							</div>
+				        							<!-- <div class="form-group">
+				        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Transfer At</label>
+				        								<div class="col-sm-3">
+				        									<p:selectOneMenu converter="transferAtConverter" style="width: 100%;" styleClass="control-select" value="#{itineraryTransfer.transferAt}">
+																<f:selectItems itemLabel="#{vTransferAt.indValueName}" itemValue="#{vTransferAt}" value="#{transferAt.transferAts}" var="vTransferAt"></f:selectItems>
+															</p:selectOneMenu>
+				        								</div>
+				        							</div> -->
+				        						</p:panel>
+			        						</p:panel>
+			        					</div>
+			        				</div>
+			        				<div class="col-md-6" style="padding-left: 10px;">
+			        					<div class="form-horizontal">
+			        						<h3 class="heading-a">Transfer To</h3>
+			        						<p:panel id="pnlToType" styleClass="panel-default">
+			        							<p:panel styleClass="panel-default" visible="#{itineraryTransfer.toTrade}">
+				        							<div class="form-group">
+				        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Trade Number</label>
+				        								<div class="col-sm-3">
+				        									<p:autoComplete
+										        				completeMethod="#{itineraryTransfer.onTradeComplete}"
+										        				converter="tradeConverter"
+										        				forceSelection="true"
+										        				itemLabel="#{tradeHdr.id.tradeNum}" 
+										        				itemValue="#{tradeHdr}"
+										        				minQueryLength="4"
+										        				value="#{itineraryTransfer.tradeHdr}"
+										        				var="tradeHdr">
+											       				 <p:column headerText="Buy/Sell" styleClass="column-normal" style="background: transparent; border: 1px solid #f7f7f7; color: #006633;"><h:outputText style="color: #4f4f4f !important;" value="#{tradeHdr.id.buySellInd eq 1 ? 'Buy' : 'Sell'}" /></p:column>
+											       				 <p:column headerText="Commodity" styleClass="column-normal" style="background: transparent; border: 1px solid #f7f7f7; color: #006633;"><h:outputText style="color: #4f4f4f !important;" value="#{tradeHdr.id.cmdtyCd}" /></p:column>
+											       				 <p:column headerText="Trade Qty" styleClass="column-normal" style="background: transparent; border: 1px solid #f7f7f7; color: #006633;">
+											       				 	<h:outputText style="color: #4f4f4f !important;" value="#{tradeHdr.id.tradeQty}">
+										             					<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00"/>
+										             				</h:outputText>
+											       				 </p:column>
+											       				 <p:column headerText="Open Qty" styleClass="column-normal" style="background: transparent; border: 1px solid #f7f7f7; color: #006633;">
+											       				 	<h:outputText style="color: #4f4f4f !important;" value="#{tradeHdr.id.openQty}">
+											       				 		<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00" />
+											       				 	</h:outputText>
+											       				 </p:column>
+											       				 <p:ajax event="itemSelect" global="false" listener="#{itineraryTransfer.onTradeSelect}" update="txtToScheduledQty, txtToNominalQty"></p:ajax>
+										        			</p:autoComplete>
+				        								</div>
+				        							</div>
+				        							<div class="form-group">
+				        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Scheduled Qty</label>
+				        								<div class="col-sm-3">
+				        									<p:inputText id="txtToScheduledQty" styleClass="form-control" value="#{itineraryTransfer.scheduledQty}">
+				        										<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00"/>
+				        										<p:ajax event="keyup" global="false" listener="#{itineraryTransfer.onQtyChange('0')}" process="@this" update="txtToNominalQty, txtFromCargoQty, txtFromStorageQty"></p:ajax>
+				        									</p:inputText>
+				        								</div>
+				        							</div>
+				        							<div class="form-group">
+				        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Nominal Qty</label>
+				        								<div class="col-sm-3">
+				        									<p:inputText disabled="true" id="txtToNominalQty" styleClass="form-control" value="#{itineraryTransfer.nominalQty}">
+				        										<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00"/>
+				        									</p:inputText>
+				        								</div>
+				        							</div>
+				        						</p:panel>
+			        							<p:panel styleClass="panel-default" visible="#{itineraryTransfer.toStorage}">
+				        							<div class="form-group">
+				        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Storage</label>
+				        								<div class="col-sm-3">
+				        									<p:selectOneMenu converter="storageConverter" filter="true" filterMatchMode="contains" style="width: 100%;" styleClass="control-select" value="#{itineraryTransfer.storage}">
+				        										<p:ajax event="change" global="false" listener="#{itineraryTransfer.onStorageSelect}" update="txtToLevel"></p:ajax>
+																<f:selectItems itemLabel="#{vStorage.codStorage}" itemValue="#{vStorage}" value="#{storage.lstStorages}" var="vStorage"></f:selectItems>
+															</p:selectOneMenu>
+				        								</div>
+				        							</div>
+				        							<div class="form-group">
+				        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Level</label>
+				        								<div class="col-sm-3">
+				        									<p:selectOneMenu converter="cargoConverter" filter="true" filterMatchMode="contains" id="txtToLevel" style="width: 100%;" styleClass="control-select" value="#{itineraryTransfer.level}">
+																<f:selectItems itemLabel="#{vLevel.id.nameCargo}" itemValue="#{vLevel}" value="#{itineraryTransfer.levelLst}" var="vLevel"></f:selectItems>
+															</p:selectOneMenu>
+				        								</div>
+				        							</div>
+				        							<div class="form-group">
+				        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Storage Qty</label>
+				        								<div class="col-sm-3">
+				        									<p:inputText id="txtToStorageQty" styleClass="form-control" value="#{itineraryTransfer.storageQty}">
+				        										<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00"/>
+				        										<p:ajax event="keyup" global="false" listener="#{itineraryTransfer.onQtyChange('2')}" process="@this" update="txtFromScheduledQty txtFromNominalQty, txtFromCargoQty"></p:ajax>
+				        									</p:inputText>
+				        								</div>
+				        							</div>
+				        						</p:panel>
+				        						<p:panel styleClass="panel-default" visible="#{itineraryTransfer.toVessel}">
+				        							<div class="form-group">
+				        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Vehicle</label>
+				        								<div class="col-sm-3">
+				        									<p:inputText disabled="true" styleClass="form-control" value="#{itineraryTransfer.vehicle.equipmentNum} - #{itineraryTransfer.vehicle.motTypeInd.indValueName} - #{itineraryTransfer.vehicle.motNum}"></p:inputText>
+				        								</div>
+				        							</div>
+				        							<div class="form-group">
+				        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Cargo</label>
+				        								<div class="col-sm-3">
+				        									<p:inputText disabled="true" styleClass="form-control" value="#{itineraryTransfer.cargo.numCargo} - #{itineraryTransfer.cargo.nameCargo} - #{itineraryTransfer.cargo.codCommodity}"></p:inputText>
+				        								</div>
+				        							</div>
+				        							<div class="form-group">
+				        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Cargo Qty</label>
+				        								<div class="col-sm-3">
+				        									<p:inputText id="txtToCargoQty" styleClass="form-control" value="#{itineraryTransfer.cargoQty}">
+				        										<p:ajax event="keyup" global="false" listener="#{itineraryTransfer.onQtyChange('1')}" process="@this" update="txtFromScheduledQty, txtFromNominalQty, txtFromStorageQty"></p:ajax>
+				        									</p:inputText>
+				        								</div>
+				        							</div>
+				        							<!-- <div class="form-group">
+				        								<label class="col-sm-3 control-label" style="margin-right: 10px;">Transfer At</label>
+				        								<div class="col-sm-3">
+				        									<p:selectOneMenu converter="transferAtConverter" style="width: 100%;" styleClass="control-select" value="#{itineraryTransfer.transferAt}">
+																<f:selectItems itemLabel="#{vTransferAt.indValueName}" itemValue="#{vTransferAt}" value="#{transferAt.transferAts}" var="vTransferAt"></f:selectItems>
+															</p:selectOneMenu>
+				        								</div>
+				        							</div> -->
+				        						</p:panel>
+			        						</p:panel>
+			        					</div>
+			        				</div>
+        						</p:tab>
+        						<p:tab title="Tags">
+        							<p:commandLink actionListener="#{itineraryTransfer.onAddTag}" global="false" process="@this" style="margin-bottom: 10px;" styleClass="btn btn-primary" update="tblTransferTag">
+			                    		<h:outputText value="Add Tag" />
+			                    	</p:commandLink>
+			                    	<p:fileUpload fileUploadListener="#{itineraryTransfer.onUploadTag}" label="Add Tags From Excel" mode="advanced" style="margin-left: 10px; margin-bottom: 10px;"  styleClass="btn btn-primary" update="tblTransferTag"></p:fileUpload>
+			                    	<p:commandLink actionListener="#{itineraryTransfer.onRemoveAllTag}" global="false" process="@this" style="margin-left: 10px; margin-bottom: 10px;" styleClass="btn btn-danger" update="tblTransferTag">
+			                    		<h:outputText value="Remove All Tags" />
+			                    	</p:commandLink>
+        						
+        							<p:dataTable
+        								editable="true"
+			        					editMode="cell"
+			                    		emptyMessage="No Tags available."
+			                    		id="tblTransferTag"
+			                    		scrollable="true"
+										scrollHeight="141"
+			                    		styleClass="data-table"
+			                    		value="#{itineraryTransfer.tagLst}"
+			                    		var="tagLst">
+			                    		
+			                    		<p:column headerText="Type">
+		                    				<p:cellEditor>
+			                    				<f:facet name="output"><h:outputText value="#{tagLst.id.tagTypeCd}" /></f:facet>
+			                    				<f:facet name="input"><h:inputText disabled="true" value="#{tagLst.id.tagTypeCd}" /></f:facet>
+			                    			</p:cellEditor>
+									    </p:column>
+									    
+									    <p:column headerText="Chop Id">
+		                    				<p:cellEditor>
+			                    				<f:facet name="output"><h:outputText value="#{tagLst.id.chopId}" /></f:facet>
+			                    				<f:facet name="input"><h:inputText disabled="true" value="#{tagLst.id.chopId}" /></f:facet>
+			                    			</p:cellEditor>
+									    </p:column>
+									    
+									    <p:column headerText="Container">
+		                    				<p:cellEditor>
+			                    				<f:facet name="output"><h:outputText value="#{tagLst.id.tagValue1}" /></f:facet>
+			                    				<f:facet name="input"><h:inputText value="#{tagLst.id.tagValue1}" /></f:facet>
+			                    			</p:cellEditor>
+									    </p:column>
+			                    		
+			                    		<p:column headerText="ICO">
+		                    				<p:cellEditor>
+			                    				<f:facet name="output"><h:outputText value="#{tagLst.id.tagValue2}" /></f:facet>
+			                    				<f:facet name="input"><h:inputText value="#{tagLst.id.tagValue2}" /></f:facet>
+			                    			</p:cellEditor>
+									    </p:column>
+									    
+										<p:column headerText="Comments">
+		                    				<p:cellEditor>
+			                    				<f:facet name="output"><h:outputText value="#{tagLst.id.tagValue8}" /></f:facet>
+			                    				<f:facet name="input"><h:inputText value="#{tagLst.id.tagValue8}" /></f:facet>
+			                    			</p:cellEditor>
+									    </p:column>
+									    
+									    <p:column headerText="Tag Qty">
+	                    					<p:cellEditor>
+			                    				<f:facet name="output">
+			                    					<h:outputText value="#{tagLst.id.tagQty}">
+			                    						<f:convertNumber type="number" groupingUsed="true" minFractionDigits="2" pattern="#0.00" />
+			                    					</h:outputText>
+			                    				</f:facet>
+			                    				<f:facet name="input"><h:inputText value="#{tagLst.id.tagQty}" /></f:facet>
+			                    			</p:cellEditor>
+									    </p:column>
+									    
+									    <p:column headerText="Tag Qty UOM">
+		                    				<p:cellEditor>
+			                    				<f:facet name="output"><h:outputText value="#{tagLst.id.tagQtyUomCd}" /></f:facet>
+			                    				<f:facet name="input"><h:inputText disabled="true" value="#{tagLst.id.tagQtyUomCd}" /></f:facet>
+			                    			</p:cellEditor>
+									    </p:column>
+									    
+									    <p:column style="width: 40px;">
+							        	 	<p:cellEditor>
+			                                	<f:facet name="output">
+			                                    	<p:commandLink actionListener="#{itineraryTransfer.onRemoveTag(tagLst)}" id="lnkRemoveTag" process="@this" styleClass="row-trash icon-remove" style="margin-left: 3px !important; margin-top: -10px !important; position: relative !important;" update="tblTransferTag"></p:commandLink>
+			                                    	<pe:tooltip adjustX="-5" for="lnkRemoveTag" myPosition="top, center" value="Remove tag" />
+			                                   </f:facet>
+			                                   <f:facet name="input"><h:outputText styleClass="row-trash icon-remove" style="color: #666666 !important; margin-left: 8px !important; margin-top: -10px !important; z-index: 1016;" value="" /></f:facet>
+			                               </p:cellEditor>
+								       	</p:column>
+		                    		</p:dataTable>
+        						</p:tab>
+        					</p:tabView>
+        				</div>
+        			</div>
+        			<div class="clearfix"></div>
+        			<div class="actions" style="margin-top: 16px;">
+        				<p:commandButton global="false" onclick="PF('dlgTransfer').hide()" styleClass="btn btn-default pull-right" value="Cancel"></p:commandButton>
+						<p:commandButton actionListener="#{itineraryTransfer.onTransferSave}" process="@this, :frmItinerary:txtTransferLoadDischarge, :frmItinerary:txtTransferOption, :frmItinerary:txtTransferLocation, :frmItinerary:txtTransferEffectiveDt, :frmItinerary:txtTransferCommencementDt, :frmItinerary:txtTransferBlNumber, :frmItinerary:txtTransferBlDate, :frmItinerary:tabTransfer:pnlFromType, :frmItinerary:tabTransfer:pnlToType, :frmItinerary:tabTransfer:txtFromLevel, :frmItinerary:tabTransfer:txtToLevel" styleClass="btn btn-primary pull-right" value="Save" update=":frmItinerary:tblMovement"></p:commandButton>
+        			</div>
+				</p:dialog>
+				<p:dialog draggable="true" dynamic="true" id="dlgMatchObligation" resizable="false" styleClass="dlg-default" widgetVar="dlgMatchObligation" width="600">
+					<p:commandLink actionListener="#{itinerary.updateMatchObligationRef}" style="float: left;" styleClass="icon-loop-2" update="tblMatchObligationRef">
+						<span style="margin-left: 4px;">Update Match Obligation Ref.</span>
+					</p:commandLink>
+					<br />
+					<br />
+					<p:dataTable
+						emptyMessage="No match obligation found."
+						id="tblMatchObligationRef"
+						rowKey="#{vtMatchObligation.id.obligationMatchNum}" 
+						selection="#{itinerary.matchObligationSelected}"
+						styleClass="data-table"
+						value="#{itinerary.matchObligations}" 
+						var="vtMatchObligation">
+						<p:column selectionMode="single" style="text-align: center; width: 38px;"/>
+				        <p:column headerText="MO Number" styleClass="column-normal" style="background: transparent;">
+							<h:outputText style="color: #4f4f4f !important;" value="#{vtMatchObligation.id.obligationMatchNum}" />
+						</p:column>
+						<p:column headerText="Trade Number" styleClass="column-normal" style="background: transparent;">
+							<h:outputText style="color: #4f4f4f !important;" value="#{vtMatchObligation.id.sTradeInputId.tradeNum}" />
+						</p:column>
+						<p:column headerText="Counterpart" styleClass="column-normal" style="background: transparent;">
+							<h:outputText style="color: #4f4f4f !important;" value="#{vtMatchObligation.id.sTradeInputId.counterpart}" />
+						</p:column>
+						<p:column headerText="Destination" styleClass="column-normal" style="background: transparent;">
+							<h:outputText style="color: #4f4f4f !important;" value="#{vtMatchObligation.id.sTradeInputId.destination}" />
+						</p:column>
+					</p:dataTable>
+					<br />
+					<p:commandButton actionListener="#{itinerary.onMatchObligationSelected}" process="@this, :frmItinerary:tblMatchObligationRef" styleClass="btn btn-success" style="background: #006633; border: none; box-shadow: none; font-weight: normal; text-shadow: none; -moz-box-shadow: none; -webkit-box-shadow: none;" update=":frmItinerary:tblMatchObligation" value="Select"></p:commandButton>
+				</p:dialog>
+			</h:form>
+			<footer style="clear: both; height: 20px; padding: 20px 0 0 0; position: relative; width: 100%;">
+			  	<p style="float: right; margin: 0 5% 0 0;"><small>Copyright <h:outputText value="#{user.currentDt}"><f:convertDateTime pattern="yyyy" /></h:outputText>, Mercon Coffee Corporation</small></p>
+			</footer>
+			<p:ajaxStatus onerror="PF('dlgStatus').hide()" onstart="PF('dlgStatus').show()" onsuccess="PF('dlgStatus').hide()"></p:ajaxStatus>
+			<p:dialog closable="false" draggable="false" modal="true" resizable="false" showHeader="false" styleClass="dlg-status" widgetVar="dlgStatus">
+				<p:graphicImage name="/images/ajax-loader.gif"></p:graphicImage>
+			</p:dialog>
+		</div>
+	</h:body>
+</html>

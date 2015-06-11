@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:ui="http://java.sun.com/jsf/facelets" 
+      xmlns:h="http://java.sun.com/jsf/html" 
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+      
+      	<h:head>
+			<meta charset="UTF-8" />
+			<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+			<meta name="viewport" content="width=device-width, initial-scale=1" />
+		
+			<title>MERCON - Transfer Manager</title>
+		
+			<link href="resources/stylesheets/style.css" rel="stylesheet" type="text/css" />
+			<link href="resources/stylesheets/bootstrap.css" rel="stylesheet" type="text/css" />
+			<link href="resources/stylesheets/main.css" rel="stylesheet" type="text/css" />
+			<link href="resources/stylesheets/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+			
+			<script src="resources/javascript/jquery-1.11.1.min.js" type="text/javascript"></script>
+			<script src="resources/javascript/jquery.dataTables.min.js" type="text/javascript"></script>
+			<script src="resources/javascript/jquery.custom.js" type="text/javascript"></script>
+      </h:head>
+      
+      <h:body>
+		<div class="main-container">
+			<h:form id="frmItineraryLst" onkeypress="if(event.keyCode == 13) { return false; }">
+				<p:growl id="grwNotification" showDetail="false" sticky="true"></p:growl>
+				
+				<p:confirmDialog global="true" styleClass="confirm-dlg" widgetVar="confirmDlg">
+		       		<p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" />
+		       		<p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" />
+		       	</p:confirmDialog>
+		       	
+		       	<header>
+					<div class="logo">
+				        <img alt="MERCON" src="resources/images/mercon.png" style="width: 30%;" />
+				    </div>
+					<div id="mini-nav">
+						<ul>
+							<li>
+					            <a href="javascript:void();">
+					            	<span class="icon-user"></span>
+					            	<span class="text-label"><p:outputLabel style="font-weight: lighter; font-size: inherit;" value="#{transferLst.user.userPermission.id.firstname} #{transferLst.user.userPermission.id.lastName}" /></span>
+					            </a>
+					            <ul class="user-summary">
+									<li>
+										<div class="summary">
+											<div class="user-pic">
+												<img src="resources/images/user.png" alt="Slick Admin"/>
+											</div>
+											<div class="basic-details">
+					                    		<h4 class="no-margin"><p:outputLabel value="#{transferLst.user.userPermission.id.username}" /></h4>
+					                    		<h5 class="no-margin"><p:outputLabel value="#{transferLst.user.userPermission.id.name}" /></h5>
+					                    		<small><p:outputLabel value="#{transferLst.user.userPermission.id.location}" /></small>
+					                    	</div>
+					                  		<div class="clearfix"></div>
+					                  	</div>
+									</li>
+									<li>
+										<p:commandButton actionListener="#{user.logout}" delay="1000" immediate="true" process="@this" styleClass="btn btn-xs btn-danger pull-right" value="Logout"></p:commandButton>
+					                	<span class="clearfix"></span>
+					              	</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+				</header>
+				<div class="main-container">
+					<div class="dashboard-wrapper">
+						<div class="row page-title">
+							<h2>Transfer Manager 
+								<small>
+									<li><a href="dashboard.xhtml">Home</a></li>
+									<li>/</li>
+									<li>Transfer Manager</li>
+								</small>
+							</h2>
+				        </div>
+				        
+				        <div class="col-md-12">
+				        		<table class="dataTable stripe cell-border" id="tblTransfer" style="width: 100%;">
+				        			<thead>
+				        				<tr>
+				        					<th>Transfer Num.</th>
+				        					<th>From</th>
+				        					<th>To</th>
+				        					<th>Location</th>
+				        					<th>Effective Dt.</th>
+				        					<th>Comm. Dt.</th>
+				        					<th>Completion Dt.</th>
+				        					<th>B/L Number</th>
+				        					<th>B/L Date</th>
+				        				</tr>
+				        			</thead>
+				        		</table>
+<!-- 				        	<p:dataTable -->
+<!-- 								editable="false" -->
+<!-- 								emptyMessage="No Transfers found." -->
+<!-- 								id="tblTransfer" -->
+<!-- 								liveScroll="true" -->
+<!-- 		                    	rowKey="#{transferDataModel.id.numTransfer}" -->
+<!-- 								scrollable="true" -->
+<!-- 								scrollHeight="459" -->
+<!-- 		                    	scrollRows="20" -->
+<!-- 								scrollWidth="100%" -->
+<!-- 								styleClass="data-table" -->
+<!-- 								value="#{transferLst.transferDataModel}" -->
+<!-- 								var="transferDataModel" -->
+<!-- 								widgetVar="tblTransfer"> -->
+								
+<!-- 								<p:column filterBy="#{transferDataModel.id.numTransfer}" filterMatchMode="contains" headerText="Transfer Num." style="width: 200px;"> -->
+<!-- 									<h:outputText value="#{transferDataModel.id.numTransfer}" /> -->
+<!-- 			     				</p:column> -->
+			     				
+<!-- 			     				<p:column headerText="From" style="width: 200px;"> -->
+<!-- 									<h:outputText value="" /> -->
+<!-- 			     				</p:column> -->
+			     				
+<!-- 			     				<p:column headerText="To" style="width: 200px;"> -->
+<!-- 									<h:outputText value="" /> -->
+<!-- 			     				</p:column> -->
+								
+<!-- 								<p:column headerText="Location" style="width: 200px;"> -->
+<!-- 									<h:outputText value="" /> -->
+<!-- 			     				</p:column> -->
+								
+<!-- 								<p:column headerText="Effective Dt." style="text-align: center; width: 110px;"> -->
+<!-- 									<h:outputText value="#{transferDataModel.id.dtEffective}"> -->
+<!-- 										<f:convertDateTime pattern="MM/dd/yyyy" /> -->
+<!-- 									</h:outputText> -->
+<!-- 			     				</p:column> -->
+			     				
+<!-- 			     				<p:column headerText="Comm. Dt." style="text-align: center; width: 100px;"> -->
+<!-- 									<h:outputText value="#{transferDataModel.id.dtTransferComm}"> -->
+<!-- 										<f:convertDateTime pattern="MM/dd/yyyy" /> -->
+<!-- 									</h:outputText> -->
+<!-- 			     				</p:column> -->
+								
+<!-- 								<p:column headerText="Completion Dt." style="text-align: center; width: 110px;"> -->
+<!-- 									<h:outputText value="#{transferDataModel.id.dtTransferComp}"> -->
+<!-- 										<f:convertDateTime pattern="MM/dd/yyyy" /> -->
+<!-- 									</h:outputText> -->
+<!-- 			     				</p:column> -->
+								
+<!-- 								<p:column headerText="B/L Number" style="width: 200px;"> -->
+<!-- 									<h:outputText value="#{transferDataModel.id.codBlNum}" /> -->
+<!-- 			     				</p:column> -->
+			     				
+<!-- 			     				<p:column headerText="B/L Date" style="text-align: center; width: 100px;"> -->
+<!-- 									<h:outputText value="#{transferDataModel.id.dtBl}"> -->
+<!-- 										<f:convertDateTime pattern="MM/dd/yyyy" /> -->
+<!-- 									</h:outputText> -->
+<!-- 			     				</p:column> -->
+			     				
+<!-- 			     				<p:column headerText="Obligation Num." style="width: 200px;"> -->
+<!-- 									<h:outputText value="#{transferDataModel.id.numObligation}" /> -->
+<!-- 			     				</p:column> -->
+			     				
+<!-- 			     				<p:column headerText="Build Num." style="width: 200px;"> -->
+<!-- 									<h:outputText value="" /> -->
+<!-- 			     				</p:column> -->
+			     				
+<!-- 			     				<p:column headerText="Draw Num." style="width: 200px;"> -->
+<!-- 									<h:outputText value="" /> -->
+<!-- 			     				</p:column> -->
+								
+<!-- 								<p:column headerText="Trade Num." style="width: 200px;"> -->
+<!-- 									<h:outputText value="" /> -->
+<!-- 			     				</p:column> -->
+								
+<!-- 								<p:column headerText="Buy/Sell" style="width: 200px;"> -->
+<!-- 									<h:outputText value="" /> -->
+<!-- 			     				</p:column> -->
+			     				
+<!-- 			     				<p:column headerText="Counterpart" style="width: 200px;"> -->
+<!-- 									<h:outputText value="" /> -->
+<!-- 			     				</p:column> -->
+			     				
+<!-- 			     				<p:column headerText="Delivery ID" style="width: 200px;"> -->
+<!-- 									<h:outputText value="" /> -->
+<!-- 			     				</p:column> -->
+								
+<!-- 							</p:dataTable> -->
+				        </div>
+					</div>
+				</div>
+			</h:form>
+			<footer style="clear: both; height: 20px; padding: 20px 0 0 0; position: relative; width: 100%;">
+			  	<p style="float: right; margin: 0 5% 0 0;"><small>Copyright <h:outputText value="#{user.currentDt}"><f:convertDateTime pattern="yyyy" /></h:outputText>, Mercon Coffee Corporation</small></p>
+			</footer>
+			<p:ajaxStatus onerror="PF('dlgStatus').hide()" onstart="PF('dlgStatus').show()" onsuccess="PF('dlgStatus').hide()"></p:ajaxStatus>
+			<p:dialog closable="false" draggable="false" modal="true" resizable="false" showHeader="false" styleClass="dlg-status" widgetVar="dlgStatus">
+				<p:graphicImage name="/images/ajax-loader.gif"></p:graphicImage>
+			</p:dialog>
+		</div>
+	</h:body>
+      
+</html>
