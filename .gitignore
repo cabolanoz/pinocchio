@@ -8,3 +8,4 @@ tmp/
 .npmignore
 .settings/
 *.class
+bin/
